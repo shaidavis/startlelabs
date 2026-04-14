@@ -5,6 +5,11 @@
   --color-foreground: #ededed;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Haze-aligned breakpoints: phone (<810), tablet (810-1023), laptop (1024-1439), desktop (1440+) */
+  --breakpoint-sm: 810px;
+  --breakpoint-md: 1024px;
+  --breakpoint-lg: 1440px;
 }
 
 body {
@@ -12,10 +17,7 @@ body {
   color: var(--color-foreground);
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
+/* Note: scroll-behavior: smooth removed — causes issues with sticky scroll animations */
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {

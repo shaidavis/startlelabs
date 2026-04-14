@@ -1,31 +1,128 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type Variants, type Transition } from "framer-motion";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import type { Service } from "@/data/services";
-import { PageTransition } from "@/components/layout/PageTransition";
+import { HazeBackground } from "@/components/ui/HazeBackground";
 
 interface ServicePageTemplateProps {
   service: Service;
 }
 
+/* ─── Parallax entrance variants ────────────────────────────────────── */
+
+// The page wrapper slides up as one unit
+const pageSlide: Transition = { type: "spring", damping: 28, stiffness: 180, mass: 1.2 };
+
+// Hero content elements rise faster than the page (parallax),
+// with staggered delays so each piece cascades in
+const heroContent: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.08, delayChildren: 0.15 },
+  },
+};
+
+function heroItem(extraY: number, delay: number): Variants {
+  return {
+    hidden: { opacity: 0, y: extraY },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        damping: 25,
+        stiffness: 200,
+        delay,
+      },
+    },
+  };
+}
+
+// Content sections below the hero rise in with their own parallax
+function risingSection(delay: number): Variants {
+  return {
+    hidden: { opacity: 0, y: 60 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        damping: 30,
+        stiffness: 180,
+        delay,
+      },
+    },
+  };
+}
+
 export function ServicePageTemplate({ service }: ServicePageTemplateProps) {
   return (
-    <PageTransition>
-      {/* Hero */}
-      <section
-        className="flex items-center justify-center min-h-[70vh] px-8"
-        style={{ backgroundColor: service.accentColor }}
+    // Page-level slide up (the elevator)
+    <motion.div
+      initial={{ y: "100vh" }}
+      animate={{ y: 0 }}
+      transition={pageSlide}
+    >
+      {/* Back to home */}
+      <motion.a
+        href="/"
+        className="fixed top-24 left-8 z-40 flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6, duration: 0.3 }}
       >
-        <div className="max-w-4xl text-center text-white">
-          <p className="text-sm uppercase tracking-widest mb-4 text-white/60">{service.title}</p>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6">{service.headline}</h1>
-          <p className="text-lg text-white/80 max-w-2xl mx-auto">{service.description}</p>
-        </div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M10 12L6 8L10 4" />
+        </svg>
+        Back
+      </motion.a>
+
+      {/* Hero — content elements have their own parallax rising */}
+      <section
+        className="relative flex items-center justify-center min-h-[70vh] px-8 overflow-hidden"
+      >
+        <HazeBackground accentColor={service.accentColor} />
+        <motion.div
+          className="relative z-10 max-w-4xl text-center text-white"
+          variants={heroContent}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Label — rises 80px, arrives first */}
+          <motion.p
+            className="text-sm uppercase tracking-widest mb-4 text-white/60"
+            variants={heroItem(80, 0.1)}
+          >
+            {service.title}
+          </motion.p>
+
+          {/* Headline — rises 120px, fastest parallax feel */}
+          <motion.h1
+            className="text-5xl md:text-7xl font-bold mb-6"
+            variants={heroItem(120, 0.15)}
+          >
+            {service.headline}
+          </motion.h1>
+
+          {/* Description — rises 60px, arrives slightly behind */}
+          <motion.p
+            className="text-lg text-white/80 max-w-2xl mx-auto"
+            variants={heroItem(60, 0.25)}
+          >
+            {service.description}
+          </motion.p>
+        </motion.div>
       </section>
 
-      {/* Stats */}
-      <section className="py-24 px-8 bg-neutral-950">
+      {/* Stats — rises as a block with delay */}
+      <motion.section
+        className="py-24 px-8 bg-neutral-950"
+        variants={risingSection(0.3)}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+      >
         <motion.div
           className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12"
           variants={staggerContainer}
@@ -40,10 +137,16 @@ export function ServicePageTemplate({ service }: ServicePageTemplateProps) {
             </motion.div>
           ))}
         </motion.div>
-      </section>
+      </motion.section>
 
-      {/* Features */}
-      <section className="py-24 px-8 bg-black">
+      {/* Features — rises with slightly more delay */}
+      <motion.section
+        className="py-24 px-8 bg-black"
+        variants={risingSection(0.1)}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+      >
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold mb-16 text-center">What we do</h2>
           <motion.div
@@ -61,13 +164,13 @@ export function ServicePageTemplate({ service }: ServicePageTemplateProps) {
             ))}
           </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Testimonial */}
       <section className="py-24 px-8 bg-neutral-950">
         <motion.div
           className="max-w-3xl mx-auto text-center"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
@@ -91,6 +194,6 @@ export function ServicePageTemplate({ service }: ServicePageTemplateProps) {
           {service.cta.text}
         </a>
       </section>
-    </PageTransition>
+    </motion.div>
   );
 }

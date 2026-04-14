@@ -35,29 +35,3 @@ export const scaleOnHover = {
   transition: { duration: 0.3 },
 };
 
-export const menuFadeIn: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { type: "spring", damping: 25, stiffness: 200 } },
-  exit: { opacity: 0, transition: { duration: 0.3 } },
-};
-
-export const menuLinkItem: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } },
-};
-
-export const menuLinkContainer: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.2,
-    },
-  },
-  exit: {
-    transition: {
-      staggerChildren: 0.05,
-      staggerDirection: -1,
-    },
-  },
-};

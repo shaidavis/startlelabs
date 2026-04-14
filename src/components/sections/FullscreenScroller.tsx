@@ -9,6 +9,7 @@ import {
   type MotionValue,
 } from "framer-motion";
 import type { Service } from "@/data/services";
+import { HazeBackground } from "@/components/ui/HazeBackground";
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
 
@@ -20,156 +21,224 @@ interface ScrollSectionData {
   index: number;
 }
 
+/* ─── Scroll-driven content animation ──────────────────────────────── */
+
+/**
+ * Applies continuous opacity + y transforms to a DOM element based on scroll
+ * progress, bypassing Framer Motion's WAAPI engine (which can't handle
+ * function-derived motion values). Subscribes directly to the MotionValue
+ * and writes styles via ref.
+ */
+function useScrollContent(
+  ref: React.RefObject<HTMLElement | null>,
+  scrollYProgress: MotionValue<number>,
+  snapPoint: number,
+  sectionSpan: number,
+  staggerOffset = 0
+) {
+  // Parallax multiplier: text moves faster than its panel background.
+  // Panel bg slides at 1x scroll rate; text moves at ~1.4x, creating depth.
+  // Higher stagger = element enters/exits slightly later (cascading fly-off).
+  const parallaxStrength = 120 + staggerOffset * 40; // px of extra horizontal travel
+  const staggerDelay = staggerOffset * 0.06; // normalized scroll units
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const update = (v: number) => {
+      const normalized = (v - snapPoint) / sectionSpan;
+
+      // Horizontal parallax: text flies ahead of the panel's own x-push.
+      // At normalized=0 (centered), x=0. As the panel exits, text leads it.
+      const x = normalized * -parallaxStrength;
+
+      // Staggered opacity: later elements fade slightly behind the lead element
+      const dist = Math.abs(normalized);
+      let opacity = 1;
+      if (dist > 0.6) {
+        // Fade near edges of visibility
+        opacity = Math.max(0, 1 - (dist - 0.6) / 0.4);
+      }
+      // Stagger: later items start fading slightly sooner
+      if (staggerDelay > 0 && dist > 0.5 - staggerDelay) {
+        opacity = Math.min(opacity, Math.max(0, 1 - (dist - (0.5 - staggerDelay)) / 0.5));
+      }
+
+      el.style.opacity = String(Math.max(0, Math.min(1, opacity)));
+      el.style.transform = `translateX(${x}px)`;
+    };
+
+    update(scrollYProgress.get());
+    return scrollYProgress.on("change", update);
+  }, [ref, scrollYProgress, snapPoint, sectionSpan, parallaxStrength, staggerDelay]);
+}
+
 /* ─── Panel content components ───────────────────────────────────────── */
 
-function HeroPanel({ visible }: { visible: boolean }) {
+interface PanelProps {
+  scrollYProgress: MotionValue<number>;
+  snapPoint: number;
+  sectionSpan: number;
+}
+
+function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
+  const h1Ref = useRef<HTMLHeadingElement>(null);
+  const subRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+
+  useScrollContent(h1Ref, scrollYProgress, snapPoint, sectionSpan, 0);
+  useScrollContent(subRef, scrollYProgress, snapPoint, sectionSpan, 1);
+  useScrollContent(ctaRef, scrollYProgress, snapPoint, sectionSpan, 2);
+
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a] px-8">
-      <div className="flex flex-col items-center text-center gap-6 max-w-4xl">
-        <motion.h1
-          className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-none"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0 : 0 }}
+    <div className="absolute inset-0 flex items-end sm:items-center justify-center bg-[#0a0a0a] px-6 pb-32 sm:pb-0 sm:px-8">
+      <div className="flex flex-col items-center text-center gap-4 sm:gap-6 max-w-4xl">
+        <h1
+          ref={h1Ref}
+          className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.05] will-change-transform"
         >
           Creativity that inspires
-        </motion.h1>
-        <motion.p
-          className="text-lg md:text-xl text-neutral-400 max-w-2xl"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0.1 : 0 }}
+        </h1>
+        <p
+          ref={subRef}
+          className="text-base sm:text-lg md:text-xl text-neutral-400 max-w-2xl will-change-transform"
         >
           Brand identity, strategy, art direction, and products that inspire.
           We build brands that move markets.
-        </motion.p>
-        <motion.div
-          className="mt-4"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0.2 : 0 }}
-        >
-          <span className="px-8 py-4 bg-white text-black font-medium rounded-full inline-block cursor-pointer hover:bg-neutral-200 transition-colors">
+        </p>
+        <div ref={ctaRef} className="mt-2 sm:mt-4 will-change-transform">
+          <span className="px-6 py-3 sm:px-8 sm:py-4 bg-white text-black font-medium rounded-full inline-block cursor-pointer hover:bg-neutral-200 transition-colors text-sm sm:text-base">
             Explore Services
           </span>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
 }
 
-function ServicePanel({ service, visible }: { service: Service; visible: boolean }) {
+function ServicePanel({
+  service,
+  scrollYProgress,
+  snapPoint,
+  sectionSpan,
+}: PanelProps & { service: Service }) {
+  const labelRef = useRef<HTMLParagraphElement>(null);
+  const h2Ref = useRef<HTMLHeadingElement>(null);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLAnchorElement>(null);
+
+  useScrollContent(labelRef, scrollYProgress, snapPoint, sectionSpan, 0);
+  useScrollContent(h2Ref, scrollYProgress, snapPoint, sectionSpan, 1);
+  useScrollContent(descRef, scrollYProgress, snapPoint, sectionSpan, 2);
+  useScrollContent(ctaRef, scrollYProgress, snapPoint, sectionSpan, 3);
+
   return (
     <div
-      className="absolute inset-0 flex items-center justify-center"
-      style={{ backgroundColor: service.accentColor }}
+      className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60" />
+      <HazeBackground accentColor={service.accentColor} />
       <div className="relative z-10 flex flex-col items-center text-center gap-4 text-white px-8 max-w-4xl w-full">
-        <motion.p
-          className="text-sm uppercase tracking-widest text-white/50"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0 : 0 }}
+        <p
+          ref={labelRef}
+          className="text-sm uppercase tracking-widest text-white/50 will-change-transform"
         >
           {service.title}
-        </motion.p>
-        <motion.h2
-          className="text-5xl md:text-7xl font-bold"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0.08 : 0 }}
+        </p>
+        <h2
+          ref={h2Ref}
+          className="text-5xl md:text-7xl font-bold will-change-transform"
         >
           {service.headline}
-        </motion.h2>
-        <motion.p
-          className="text-lg text-white/70 max-w-lg"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0.16 : 0 }}
+        </h2>
+        <p
+          ref={descRef}
+          className="text-lg text-white/70 max-w-lg will-change-transform"
         >
           {service.description}
-        </motion.p>
-        <motion.a
+        </p>
+        <a
+          ref={ctaRef}
           href={`/services/${service.slug}`}
-          className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-colors"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0.24 : 0 }}
+          className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 hover:bg-white/20 transition-colors will-change-transform"
         >
           Learn More
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M4 12L12 4M12 4H6M12 4V10" />
           </svg>
-        </motion.a>
+        </a>
       </div>
     </div>
   );
 }
 
-function AboutPanel({ visible }: { visible: boolean }) {
+function AboutPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
+  const h2Ref = useRef<HTMLHeadingElement>(null);
+  const subRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLAnchorElement>(null);
+
+  useScrollContent(h2Ref, scrollYProgress, snapPoint, sectionSpan, 0);
+  useScrollContent(subRef, scrollYProgress, snapPoint, sectionSpan, 1);
+  useScrollContent(ctaRef, scrollYProgress, snapPoint, sectionSpan, 2);
+
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-neutral-950 px-8">
       <div className="text-center max-w-3xl">
-        <motion.h2
-          className="text-4xl md:text-6xl font-bold mb-6"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0 : 0 }}
+        <h2
+          ref={h2Ref}
+          className="text-4xl md:text-6xl font-bold mb-6 will-change-transform"
         >
           About Startle Labs
-        </motion.h2>
-        <motion.p
-          className="text-lg text-neutral-400 mb-8"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0.1 : 0 }}
+        </h2>
+        <p
+          ref={subRef}
+          className="text-lg text-neutral-400 mb-8 will-change-transform"
         >
           We&apos;re a branding and creative agency that believes connection isn&apos;t a skill — it&apos;s a choice.
-        </motion.p>
-        <motion.a
+        </p>
+        <a
+          ref={ctaRef}
           href="/about"
-          className="px-8 py-4 bg-white text-black font-medium rounded-full hover:bg-neutral-200 transition-colors inline-block"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0.2 : 0 }}
+          className="px-8 py-4 bg-white text-black font-medium rounded-full hover:bg-neutral-200 transition-colors inline-block will-change-transform"
         >
           Learn More
-        </motion.a>
+        </a>
       </div>
     </div>
   );
 }
 
-function ContactPanel({ visible }: { visible: boolean }) {
+function ContactPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
+  const h2Ref = useRef<HTMLHeadingElement>(null);
+  const subRef = useRef<HTMLParagraphElement>(null);
+  const ctaRef = useRef<HTMLAnchorElement>(null);
+
+  useScrollContent(h2Ref, scrollYProgress, snapPoint, sectionSpan, 0);
+  useScrollContent(subRef, scrollYProgress, snapPoint, sectionSpan, 1);
+  useScrollContent(ctaRef, scrollYProgress, snapPoint, sectionSpan, 2);
+
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-black px-8">
       <div className="text-center max-w-2xl">
-        <motion.h2
-          className="text-3xl md:text-5xl font-bold mb-4"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0 : 0 }}
+        <h2
+          ref={h2Ref}
+          className="text-3xl md:text-5xl font-bold mb-4 will-change-transform"
         >
           Let&apos;s work together
-        </motion.h2>
-        <motion.p
-          className="text-neutral-400 mb-8"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0.1 : 0 }}
+        </h2>
+        <p
+          ref={subRef}
+          className="text-neutral-400 mb-8 will-change-transform"
         >
           Ready to build something remarkable?
-        </motion.p>
-        <motion.a
+        </p>
+        <a
+          ref={ctaRef}
           href="/contact"
-          className="px-8 py-4 border border-white/20 rounded-full hover:bg-white/10 transition-colors inline-block"
-          initial={false}
-          animate={visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1], delay: visible ? 0.2 : 0 }}
+          className="px-8 py-4 border border-white/20 rounded-full hover:bg-white/10 transition-colors inline-block will-change-transform"
         >
           Get in Touch
-        </motion.a>
+        </a>
       </div>
     </div>
   );
@@ -198,36 +267,27 @@ function ScrollPanel({
 }) {
   const last = totalSections - 1;
   const snapPoint = section.index / last;
+  const sectionSpan = 1 / last; // scroll distance per section
 
-  // Linear x offset: always edge-to-edge with neighbors
+  // Horizontal push: sections slide left/right as a strip
   const x = useTransform(
     scrollYProgress,
     (v: number) => `${(snapPoint - v) * last * 100}%`
   );
 
-  // Content visibility: active when within ~20% of snap point
-  const [isActive, setIsActive] = useState(section.index === 0);
-
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (v) => {
-      const distance = Math.abs(v - snapPoint);
-      const threshold = 0.5 / last; // half a section width
-      setIsActive(distance < threshold * 0.4);
-    });
-    return unsubscribe;
-  }, [scrollYProgress, snapPoint, last]);
+  const panelProps = { scrollYProgress, snapPoint, sectionSpan };
 
   return (
     <motion.div
       className="absolute inset-0 will-change-transform"
       style={{ x }}
     >
-      {section.type === "hero" && <HeroPanel visible={isActive} />}
+      {section.type === "hero" && <HeroPanel {...panelProps} />}
       {section.type === "service" && section.service && (
-        <ServicePanel service={section.service} visible={isActive} />
+        <ServicePanel service={section.service} {...panelProps} />
       )}
-      {section.type === "about" && <AboutPanel visible={isActive} />}
-      {section.type === "contact" && <ContactPanel visible={isActive} />}
+      {section.type === "about" && <AboutPanel {...panelProps} />}
+      {section.type === "contact" && <ContactPanel {...panelProps} />}
     </motion.div>
   );
 }
@@ -251,15 +311,15 @@ function TopNav({
   const lineProgress = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-[88px] z-[55] flex items-center px-8">
+    <div className="fixed top-0 left-0 right-0 h-[88px] z-[55] hidden sm:flex items-center px-8">
       <div className="flex-1 relative flex items-center justify-between mx-[140px]">
         {/* Background track line (subtle) */}
         <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-[1px] bg-white/10" />
 
         {/* Filled progress line — moves between dots with scroll */}
-        <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-[1px] overflow-hidden">
+        <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-[2px] overflow-hidden">
           <motion.div
-            className="h-full bg-white/40 origin-left"
+            className="h-full bg-white/30 origin-left"
             style={{ width: lineProgress }}
           />
         </div>
@@ -396,56 +456,7 @@ function ScrollIndicator({
   );
 }
 
-/* ─── Snap Scroll Manager ────────────────────────────────────────────── */
-
-function useSnapScroll(containerRef: React.RefObject<HTMLDivElement | null>, totalSections: number) {
-  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isSnapping = useRef(false);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const sectionHeight = container.scrollHeight / totalSections;
-
-    function handleScroll() {
-      if (isSnapping.current) return;
-
-      if (scrollTimeout.current) {
-        clearTimeout(scrollTimeout.current);
-      }
-
-      scrollTimeout.current = setTimeout(() => {
-        const scrollTop = window.scrollY;
-        const containerTop = container!.offsetTop;
-        const relativeScroll = scrollTop - containerTop;
-
-        if (relativeScroll < 0 || relativeScroll > container!.scrollHeight - window.innerHeight) return;
-
-        const nearestSection = Math.round(relativeScroll / sectionHeight);
-        const snapTarget = containerTop + nearestSection * sectionHeight;
-
-        if (Math.abs(scrollTop - snapTarget) > 10) {
-          isSnapping.current = true;
-          window.scrollTo({
-            top: snapTarget,
-            behavior: "smooth",
-          });
-
-          setTimeout(() => {
-            isSnapping.current = false;
-          }, 600);
-        }
-      }, 150);
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-    };
-  }, [containerRef, totalSections]);
-}
+/* Snap logic removed — Haze-style: free scroll with continuous transforms */
 
 /* ─── Main Component ─────────────────────────────────────────────────── */
 
@@ -476,16 +487,15 @@ export function FullscreenScroller({ services }: FullscreenScrollerProps) {
     offset: ["start start", "end end"],
   });
 
-  useSnapScroll(containerRef, totalSections);
-
   return (
     <>
       <div
         ref={containerRef}
+        data-scroller-sections={totalSections}
         style={{ height: `${totalSections * 100}vh` }}
         className="relative"
       >
-        {/* Sticky viewport — pins to screen */}
+        {/* Sticky viewport — pins to screen while user scrolls */}
         <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#0a0a0a]">
           {sections.map((section) => (
             <ScrollPanel

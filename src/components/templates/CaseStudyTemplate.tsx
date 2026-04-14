@@ -11,7 +11,7 @@ interface CaseStudyTemplateProps {
 
 export function CaseStudyTemplate({ project }: CaseStudyTemplateProps) {
   return (
-    <PageTransition>
+    <PageTransition variant="slide-up">
       {/* Hero */}
       <section
         className="flex items-center justify-center min-h-[80vh] px-8"
@@ -51,10 +51,10 @@ export function CaseStudyTemplate({ project }: CaseStudyTemplateProps) {
           </motion.div>
 
           {/* Image grid placeholder */}
-          <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12" variants={fadeInUp}>
+          <motion.div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12" variants={fadeInUp}>
             <div className="aspect-[4/3] rounded-xl bg-neutral-800" />
             <div className="aspect-[4/3] rounded-xl bg-neutral-800" />
-            <div className="aspect-[4/3] rounded-xl bg-neutral-800 md:col-span-2" />
+            <div className="aspect-[4/3] rounded-xl bg-neutral-800 sm:col-span-2" />
           </motion.div>
 
           <motion.div variants={fadeInUp}>

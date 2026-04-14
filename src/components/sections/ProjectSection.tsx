@@ -3,6 +3,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import type { Project } from "@/data/projects";
+import { HazeBackground } from "@/components/ui/HazeBackground";
 
 interface ProjectSectionProps {
   project: Project;
@@ -17,11 +18,9 @@ export function ProjectSection({ project, index }: ProjectSectionProps) {
     <section
       ref={ref}
       id={`project-${index + 1}`}
-      className="relative flex items-center justify-center w-full h-screen"
-      style={{ backgroundColor: project.accentColor }}
+      className="relative flex items-center justify-center w-full h-screen bg-[#0a0a0a]"
     >
-      {/* Background placeholder */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60" />
+      <HazeBackground accentColor={project.accentColor} />
 
       {/* Content */}
       <motion.div
