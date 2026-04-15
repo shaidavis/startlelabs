@@ -3,8 +3,12 @@
 @theme inline {
   --color-background: #0a0a0a;
   --color-foreground: #ededed;
-  --font-sans: var(--font-geist-sans);
+  --color-primary: #230F2C;
+  --color-secondary: #E9C402;
+  --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
+  --font-headline: var(--font-averia-gruesa-libre);
+  --font-handwritten: var(--font-pecita);
 
   /* Haze-aligned breakpoints: phone (<810), tablet (810-1023), laptop (1024-1439), desktop (1440+) */
   --breakpoint-sm: 810px;
@@ -15,6 +19,15 @@
 body {
   background: var(--color-background);
   color: var(--color-foreground);
+  font-family: var(--font-dm-sans), sans-serif;
+}
+
+/* Font utility overrides — Tailwind @theme can't resolve runtime CSS vars from next/font */
+.font-headline {
+  font-family: var(--font-averia-gruesa-libre), serif;
+}
+.font-handwritten {
+  font-family: var(--font-pecita), cursive;
 }
 
 /* Note: scroll-behavior: smooth removed — causes issues with sticky scroll animations */

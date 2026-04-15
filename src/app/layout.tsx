@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Averia_Gruesa_Libre, DM_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import { Topbar } from "@/components/layout/Topbar";
 
 import { Footer } from "@/components/layout/Footer";
@@ -9,6 +10,25 @@ import "./globals.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+const averiaGruesaLibre = Averia_Gruesa_Libre({
+  weight: "400",
+  variable: "--font-averia-gruesa-libre",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const pecita = localFont({
+  src: "../../public/fonts/Pecita.otf",
+  variable: "--font-pecita",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -23,7 +43,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} antialiased`}>
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${averiaGruesaLibre.variable} ${dmSans.variable} ${pecita.variable} antialiased`}
+    >
       <body className="min-h-screen bg-background text-foreground font-sans">
         <a href="#main-content" className="skip-link">
           Skip to content
