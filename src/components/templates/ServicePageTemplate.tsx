@@ -764,11 +764,12 @@ export function ServicePageTemplate({ service }: Props) {
                     <h3 className="font-headline text-2xl sm:text-3xl md:text-4xl leading-tight whitespace-pre-line">
                       {r.headline}
                     </h3>
-                    <img
-                      src="/images/accents/arrow-3.png"
-                      alt=""
+                    {/* Hand-drawn squiggle arrow rendered via CSS mask so we
+                        can recolor it: white at rest, yellow on hover, with a
+                        continuous left-shift wiggle while hovered. */}
+                    <span
                       aria-hidden
-                      className="mt-4 w-20 sm:w-28 md:w-32 h-auto select-none pointer-events-none"
+                      className="banner-arrow mt-5 block h-6 sm:h-8 md:h-10 w-40 sm:w-56 md:w-72"
                     />
                   </div>
                 </Link>

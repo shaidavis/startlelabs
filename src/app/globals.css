@@ -69,6 +69,32 @@
   to   { transform: translateY(0); }
 }
 
+@keyframes banner-arrow-slide {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(-14px); }
+}
+
+/* Cross-sell banner squiggle arrow — masked PNG so we can recolor.
+   White at rest; on banner hover (parent has .group), turn yellow and
+   slide back-and-forth leftward. */
+.banner-arrow {
+  background-color: #ffffff;
+  -webkit-mask-image: url(/images/accents/arrow-3.png);
+          mask-image: url(/images/accents/arrow-3.png);
+  -webkit-mask-size: contain;
+          mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: left center;
+          mask-position: left center;
+  transition: background-color 200ms ease;
+}
+.group:hover .banner-arrow,
+.group:focus-visible .banner-arrow {
+  background-color: #efce25;
+  animation: banner-arrow-slide 0.9s ease-in-out infinite;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-foreground);
