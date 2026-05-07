@@ -659,7 +659,7 @@ export function ServicePageTemplate({ service }: Props) {
           drawn reversed hero artwork on the left, short title + body +
           yellow pill button on the right. */}
       <section
-        className="relative px-8 sm:px-16 md:px-24 lg:px-32 py-24 overflow-visible"
+        className="relative px-8 sm:px-16 md:px-24 lg:px-32 pt-12 pb-24 overflow-visible"
         style={{ backgroundColor: DARK, color: "#ffffff" }}
       >
         <TornEdge
@@ -675,7 +675,7 @@ export function ServicePageTemplate({ service }: Props) {
               src="/images/logos/SL%20logo%20grunge%20yellow.png"
               alt=""
               aria-hidden
-              className="w-full max-w-[480px] h-auto translate-y-[18%] pointer-events-none select-none"
+              className="w-full max-w-[480px] h-auto translate-y-[32%] pointer-events-none select-none"
             />
           </div>
 
