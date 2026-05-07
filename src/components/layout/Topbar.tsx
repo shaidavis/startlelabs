@@ -176,7 +176,7 @@ export function Topbar() {
           const logoContent = (
             <>
               <img
-                src="/images/icons/SL%20Logo.png"
+                src="/images/logos/SL%20logo%20grunge%20yellow%20highlight.png"
                 aria-hidden
                 alt=""
                 className="block h-7 sm:h-8 w-7 sm:w-8 shrink-0 object-contain origin-bottom-left transition-[transform,filter] duration-150 ease-out group-hover:scale-[1.15] group-hover:-rotate-12 group-hover:[filter:drop-shadow(0_0_8px_rgba(239,206,37,0.7))]"
