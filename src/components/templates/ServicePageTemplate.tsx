@@ -668,17 +668,6 @@ export function ServicePageTemplate({ service }: Props) {
           viewBoxHeight={FIGMA_TORN.closingCtaTop.viewBoxHeight}
         />
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-          {/* Yellow grunge Startle Labs lockup — sized so the bolt's tail
-              spills past the torn bottom edge into the section below. */}
-          <div className="relative flex justify-center md:justify-start">
-            <img
-              src="/images/logos/SL%20logo%20grunge%20yellow.png"
-              alt=""
-              aria-hidden
-              className="w-full max-w-[480px] h-auto translate-y-[32%] pointer-events-none select-none"
-            />
-          </div>
-
           <div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline mb-6 text-white">
               {service.closingCta.title}
@@ -705,6 +694,17 @@ export function ServicePageTemplate({ service }: Props) {
                 <path d="M1 6h18M14 1l5 5-5 5" />
               </svg>
             </a>
+          </div>
+
+          {/* Yellow grunge Startle Labs lockup — sized so the bolt's tail
+              spills past the torn bottom edge into the section below. */}
+          <div className="relative flex justify-center md:justify-end">
+            <img
+              src="/images/logos/SL%20logo%20grunge%20yellow.png"
+              alt=""
+              aria-hidden
+              className="w-full max-w-[480px] h-auto translate-y-[32%] pointer-events-none select-none"
+            />
           </div>
         </div>
       </section>
