@@ -760,8 +760,8 @@ export function ServicePageTemplate({ service }: Props) {
                   />
                   {/* Text + squiggle arrow overlay, anchored to the right
                       half of the banner where the figure leaves whitespace. */}
-                  <div className="absolute right-[6%] top-1/2 -translate-y-1/2 w-[44%] max-w-md text-white">
-                    <h3 className="font-headline text-2xl sm:text-3xl md:text-4xl leading-tight whitespace-pre-line">
+                  <div className="absolute right-[8%] top-1/2 -translate-y-1/2 w-[42%] text-white">
+                    <h3 className="font-headline text-base sm:text-lg md:text-xl leading-snug whitespace-pre-line">
                       {r.headline}
                     </h3>
                     {/* Hand-drawn squiggle arrow rendered via CSS mask so we
@@ -769,7 +769,7 @@ export function ServicePageTemplate({ service }: Props) {
                         continuous left-shift wiggle while hovered. */}
                     <span
                       aria-hidden
-                      className="banner-arrow mt-5 block h-6 sm:h-8 md:h-10 w-40 sm:w-56 md:w-72"
+                      className="banner-arrow mt-3 block h-3 sm:h-4 md:h-5 w-24 sm:w-32 md:w-40"
                     />
                   </div>
                 </Link>
