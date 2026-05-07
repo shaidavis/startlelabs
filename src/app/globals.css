@@ -74,6 +74,29 @@
   50%      { transform: translateX(-14px); }
 }
 
+@keyframes cta-arrow-bounce {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(7px); }
+}
+
+/* Service panel CTA button arrow — masked arrow-4.png, dark ink color,
+   slowly bouncing rightward to invite a click. */
+.cta-arrow {
+  display: inline-block;
+  width: 52px;
+  height: 14px;
+  background-color: #230F2C;
+  -webkit-mask-image: url(/images/accents/arrow-4.png);
+          mask-image: url(/images/accents/arrow-4.png);
+  -webkit-mask-size: contain;
+          mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  animation: cta-arrow-bounce 1.6s ease-in-out infinite;
+}
+
 /* Cross-sell banner squiggle arrow — masked PNG so we can recolor.
    White at rest; on banner hover (parent has .group), turn yellow and
    slide back-and-forth leftward. */

@@ -87,6 +87,8 @@ export interface Service {
    * Figma wireframe. Falls back to `heroImage` when not provided.
    */
   ctaArt?: string;
+  /** If true, the ctaArt image is flipped horizontally and tinted blue via CSS. */
+  ctaArtFlipped?: boolean;
   /** Copy for the closing CTA ("Curiosity piqued?" pattern). */
   closingCta: { title: string; body: string; button: string };
 }
@@ -102,7 +104,7 @@ export const services: Record<string, Service> = {
     slug: "brand-strategy",
     title: "Brand Strategy",
     navTooltip: "Strategy",
-    headline: "Creative strategy\nbrand identity,\nand messaging",
+    headline: "Creative strategy,\nbrand identity,\nand messaging\nthat inspire",
     description: "confidence",
     navTitle: "Creative strategy, Brand identity, and Messaging",
     heroTagline: "Creative Solutions",
@@ -185,7 +187,7 @@ export const services: Record<string, Service> = {
     slug: "creative-direction",
     title: "Pitch Decks",
     navTooltip: "Presentations",
-    headline: "Pitch decks,\npresentations,\nand collateral",
+    headline: "Pitch decks,\npresentations,\nand collateral\nthat inspire",
     description: "curiosity",
     navTitle: "Pitch decks, Presentations, and Collateral",
     heroTagline: "Pitch perfect.",
@@ -256,7 +258,7 @@ export const services: Record<string, Service> = {
     ],
     cta: { text: "Explore Pitch Decks", href: "/services/creative-direction" },
     relatedServices: ["digital-design", "brand-strategy"],
-    ctaArt: "/images/icons/presentations-hero-alt.svg",
+    ctaArt: "/images/icons/presentations-new.png",
     closingCta: {
       title: "Curiosity piqued?",
       body: "Placeholder body — real closing copy coming soon.",
@@ -268,7 +270,7 @@ export const services: Record<string, Service> = {
     slug: "digital-design",
     title: "Websites",
     navTooltip: "Websites",
-    headline: "Websites,\nart direction,\nand product",
+    headline: "Websites,\nart direction,\nand product\nthat inspire",
     description: "connection",
     navTitle: "Websites, Art direction, and Product",
     heroTagline: "Web perfect.",

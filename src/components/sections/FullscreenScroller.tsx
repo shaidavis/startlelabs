@@ -600,9 +600,10 @@ function ServicePanel({
         <a
           ref={ctaRef}
           href={`/services/${service.slug}`}
-          className="mt-5 sm:mt-10 inline-flex items-center gap-2 px-7 sm:px-9 py-3 sm:py-4 bg-[#E9C402] text-[#230F2C] font-semibold rounded-lg hover:brightness-110 transition-all will-change-transform text-sm sm:text-base"
+          className="mt-5 sm:mt-10 inline-flex items-center gap-3 px-7 sm:px-9 py-3 sm:py-4 bg-[#E9C402] text-[#230F2C] font-semibold rounded-lg hover:brightness-110 transition-all will-change-transform text-sm sm:text-base"
         >
           {service.cta.text}
+          <span className="cta-arrow" aria-hidden />
         </a>
       </div>
     </div>

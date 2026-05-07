@@ -91,8 +91,8 @@ const YELLOW = "#efce25";
    simple group-hover opacity crossfade. */
 const CROSS_SELL_BANNERS: Record<string, { idle: string; hover: string }> = {
   "brand-strategy": {
-    idle: "/images/banners/Branding%20Idle.svg",
-    hover: "/images/banners/Branding%20Hover.svg",
+    idle: "/images/banners/Branding%20Idle.png",
+    hover: "/images/banners/Branding%20Hover.png",
   },
   "creative-direction": {
     idle: "/images/banners/Presentations%20Idle.png",
@@ -350,6 +350,10 @@ export function ServicePageTemplate({ service }: Props) {
                 alt=""
                 aria-hidden
                 className="w-full h-full object-contain object-bottom"
+                style={service.ctaArtFlipped ? {
+                  transform: "scaleX(-1)",
+                  filter: "invert(1) sepia(1) saturate(3) hue-rotate(175deg) brightness(0.7)",
+                } : undefined}
               />
             </div>
           )}

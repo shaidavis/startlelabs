@@ -198,13 +198,11 @@ export function Topbar() {
                 /* ── Hero mode: logo centered, nothing else ── */
                 <motion.div
                   key="hero"
-                  className={`w-full h-full flex items-center justify-center transition-opacity duration-200 ${
-                    collapsed ? "opacity-0 pointer-events-none" : "opacity-100"
-                  }`}
+                  className={`w-full h-full flex items-center justify-center ${collapsed ? "pointer-events-none" : ""}`}
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  animate={{ opacity: collapsed ? 0 : 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.2 }}
                 >
                   <motion.div layoutId="topbar-logo">
                     <Link
@@ -223,13 +221,11 @@ export function Topbar() {
                 /* ── Full navbar mode ── */
                 <motion.div
                   key="full"
-                  className={`w-full h-full flex items-center justify-between px-8 sm:px-10 md:px-12 transition-opacity duration-200 ${
-                    collapsed ? "opacity-0 pointer-events-none" : "opacity-100"
-                  }`}
+                  className={`w-full h-full flex items-center justify-between px-8 sm:px-10 md:px-12 ${collapsed ? "pointer-events-none" : ""}`}
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  animate={{ opacity: collapsed ? 0 : 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.2 }}
                 >
                   <motion.div layoutId="topbar-logo">
                     <Link
