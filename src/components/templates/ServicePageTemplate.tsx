@@ -668,19 +668,17 @@ export function ServicePageTemplate({ service }: Props) {
           viewBoxHeight={FIGMA_TORN.closingCtaTop.viewBoxHeight}
         />
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
-          {/* Reversed hero artwork — only rendered if the service has a dedicated one */}
-          {service.ctaArt && (
-            <div className="flex justify-center md:justify-start">
-              <img
-                src={service.ctaArt}
-                alt=""
-                aria-hidden
-                className="w-full max-w-[520px] h-auto"
-              />
-            </div>
-          )}
+          {/* Yellow grunge Startle Labs lockup — same on every service CTA. */}
+          <div className="flex justify-center md:justify-start">
+            <img
+              src="/images/logos/SL%20logo%20grunge%20yellow.png"
+              alt=""
+              aria-hidden
+              className="w-full max-w-[900px] h-auto"
+            />
+          </div>
 
-          <div className={service.ctaArt ? "" : "md:col-span-2 text-center"}>
+          <div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline mb-6 text-white">
               {service.closingCta.title}
             </h2>
