@@ -15,59 +15,58 @@
   --breakpoint-md: 1024px;
   --breakpoint-lg: 1440px;
 
-  /* Custom animation utilities — Tailwind v4 generates animate-* classes
-     from these vars. Keyframes MUST live inside @theme — Turbopack
-     tree-shakes @keyframes blocks defined outside the theme when the only
-     references are arbitrary group-hover variants the parser doesn't
-     fully resolve. Inside @theme they're treated as theme tokens and
-     preserved alongside the matching --animate-* var. */
   --animate-wave-hand: wave-hand 1.1s ease-in-out infinite;
   --animate-heartbeat-throb: heartbeat-throb 1.3s ease-in-out 0.32s infinite;
   --animate-eye-blink: eye-blink 2s ease 0.32s infinite;
   --animate-crown-jiggle: crown-jiggle 1.1s ease-in-out 0.32s infinite;
   --animate-marquee-up: marquee-up 30s linear infinite;
   --animate-marquee-down: marquee-down 30s linear infinite;
+}
 
-  @keyframes wave-hand {
-    0%, 100% { rotate: 0deg; }
-    15%      { rotate: -20deg; }
-    35%      { rotate: 14deg; }
-    55%      { rotate: -12deg; }
-    75%      { rotate: 8deg; }
-  }
+/* Keyframes live OUTSIDE @theme so they're emitted to the final CSS even
+   when no animate-* utility references them. Custom classes like
+   .icon-anim-heartbeat reference these by name; Tailwind v4 was tree-
+   shaking them when defined inside @theme because no animate-* utility
+   was actually used in the JSX. */
+@keyframes wave-hand {
+  0%, 100% { rotate: 0deg; }
+  15%      { rotate: -20deg; }
+  35%      { rotate: 14deg; }
+  55%      { rotate: -12deg; }
+  75%      { rotate: 8deg; }
+}
 
-  @keyframes heartbeat-throb {
-    0%   { transform: scale(1); }
-    8%   { transform: scale(1.22); }
-    16%  { transform: scale(1.05); }
-    26%  { transform: scale(1.15); }
-    42%  { transform: scale(1); }
-    100% { transform: scale(1); }
-  }
+@keyframes heartbeat-throb {
+  0%   { transform: scale(1); }
+  8%   { transform: scale(1.22); }
+  16%  { transform: scale(1.05); }
+  26%  { transform: scale(1.15); }
+  42%  { transform: scale(1); }
+  100% { transform: scale(1); }
+}
 
-  @keyframes eye-blink {
-    0%, 15%, 100% { transform: scaleY(1); }
-    21%           { transform: scaleY(0); }
-    27%           { transform: scaleY(1); }
-  }
+@keyframes eye-blink {
+  0%, 15%, 100% { transform: scaleY(1); }
+  21%           { transform: scaleY(0); }
+  27%           { transform: scaleY(1); }
+}
 
-  @keyframes crown-jiggle {
-    0%, 52%, 100% { transform: rotate(0deg); }
-    10%           { transform: rotate(-13deg); }
-    25%           { transform: rotate(11deg); }
-    38%           { transform: rotate(-7deg); }
-    46%           { transform: rotate(5deg); }
-  }
+@keyframes crown-jiggle {
+  0%, 52%, 100% { transform: rotate(0deg); }
+  10%           { transform: rotate(-13deg); }
+  25%           { transform: rotate(11deg); }
+  38%           { transform: rotate(-7deg); }
+  46%           { transform: rotate(5deg); }
+}
 
-  @keyframes marquee-up {
-    from { transform: translateY(0); }
-    to   { transform: translateY(-50%); }
-  }
+@keyframes marquee-up {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
 
-  @keyframes marquee-down {
-    from { transform: translateY(-50%); }
-    to   { transform: translateY(0); }
-  }
+@keyframes marquee-down {
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0); }
 }
 
 body {
