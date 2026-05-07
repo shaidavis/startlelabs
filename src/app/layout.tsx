@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Averia_Gruesa_Libre, DM_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import { Topbar } from "@/components/layout/Topbar";
+import { LightningEffect } from "@/components/effects/LightningEffect";
 
 import { Footer } from "@/components/layout/Footer";
 import Script from "next/script";
@@ -54,6 +55,7 @@ export default function RootLayout({
         <Topbar />
         <main id="main-content">{children}</main>
         <Footer />
+        <LightningEffect />
 
         {/* Google Analytics — replace GA_MEASUREMENT_ID with actual ID */}
         {process.env.NEXT_PUBLIC_GA_ID && (

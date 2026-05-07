@@ -2,16 +2,25 @@
 
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { servicesList } from "@/data/services";
 
 interface NavigationProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+// Services are listed individually so each one has a discoverable, shareable
+// route through the menu. Previously we collapsed them into a single
+// "Services" entry that just linked to brand-strategy — which hid the other
+// two and gave no indication of what was offered. The full service detail
+// pages live at `/services/{slug}`; the homepage scroller panels are
+// accessible via SectionNav's icon strip.
 const links = [
   { label: "Home", href: "/" },
-  { label: "Services", href: "/services/brand-strategy" },
-  { label: "Work", href: "/work" },
+  ...servicesList.map((s) => ({
+    label: s.title,
+    href: `/services/${s.slug}`,
+  })),
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
