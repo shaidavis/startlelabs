@@ -733,7 +733,7 @@ export function ServicePageTemplate({ service }: Props) {
           <p className="text-xs sm:text-sm uppercase tracking-[0.2em] opacity-70 mb-8">
             Also from Startle Labs
           </p>
-          <div className="flex flex-col gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
             {related.map((r) => {
               const banner = CROSS_SELL_BANNERS[r.slug];
               if (!banner) return null;
