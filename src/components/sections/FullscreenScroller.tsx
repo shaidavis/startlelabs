@@ -747,7 +747,7 @@ function ContactPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
             Instagram
           </a>
           <a
-            href="https://www.linkedin.com/company/startle-labs"
+            href="https://linkedin.com/in/shaidavis"
             className="hover:opacity-60 transition-opacity"
           >
             LinkedIn

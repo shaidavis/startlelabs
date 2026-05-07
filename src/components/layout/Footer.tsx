@@ -71,7 +71,7 @@ export function Footer() {
           <div className="flex gap-8 text-sm uppercase tracking-[0.2em] font-semibold">
             <a href="#" className="hover:opacity-70 transition-opacity">Twitter</a>
             <a href="#" className="hover:opacity-70 transition-opacity">Instagram</a>
-            <a href="#" className="hover:opacity-70 transition-opacity">LinkedIn</a>
+            <a href="https://linkedin.com/in/shaidavis" target="_blank" rel="noopener noreferrer" className="hover:opacity-70 transition-opacity">LinkedIn</a>
           </div>
           <span className="text-xs opacity-70">
             © {new Date().getFullYear()} Startle Labs
@@ -88,7 +88,7 @@ export function Footer() {
         <div className="flex gap-6">
           <a href="#" className="hover:text-white transition-colors">Twitter</a>
           <a href="#" className="hover:text-white transition-colors">Instagram</a>
-          <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
+          <a href="https://linkedin.com/in/shaidavis" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
         </div>
       </div>
     </footer>

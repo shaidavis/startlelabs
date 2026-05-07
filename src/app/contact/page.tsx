@@ -205,7 +205,7 @@ export default function ContactPage() {
               <ul className="space-y-2 text-base">
                 <li>
                   <a
-                    href="https://www.linkedin.com/company/startle-labs"
+                    href="https://linkedin.com/in/shaidavis"
                     className="hover:underline underline-offset-4"
                   >
                     LinkedIn
