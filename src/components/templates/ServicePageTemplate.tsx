@@ -730,7 +730,7 @@ export function ServicePageTemplate({ service }: Props) {
             customPath={FIGMA_TORN.crossSellTop.path}
             viewBoxHeight={FIGMA_TORN.crossSellTop.viewBoxHeight}
           />
-          <p className="text-center font-handwritten text-4xl sm:text-5xl md:text-6xl mb-12">
+          <p className="text-center font-handwritten text-xl sm:text-2xl md:text-3xl mb-10">
             Other services from Startle Labs
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
