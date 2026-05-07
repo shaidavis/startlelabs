@@ -213,7 +213,7 @@ export function Topbar() {
                       onMouseEnter={() =>
                         window.dispatchEvent(new CustomEvent("lightning:strike"))
                       }
-                      className="group flex items-center gap-1 shrink-0"
+                      className="group flex items-center gap-0 shrink-0"
                     >
                       {logoContent}
                     </Link>
@@ -243,7 +243,7 @@ export function Topbar() {
                                 new CustomEvent("lightning:strike")
                               )
                       }
-                      className="group flex items-center gap-1 shrink-0"
+                      className="group flex items-center gap-0 shrink-0"
                     >
                       {logoContent}
                     </Link>
