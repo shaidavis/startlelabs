@@ -3,6 +3,18 @@
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { TornEdge } from "@/components/ui/TornEdge";
+import { RadiatingBolts } from "@/components/effects/RadiatingBolts";
+
+// 8 bolts evenly spaced — fewer than the hero's 12 to suit the small icon.
+const HEART_BOLTS = (() => {
+  const count = 8;
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    const angle = -90 + (i * 360) / count;
+    out.push({ shape: "zigzag-1" as const, angle, size: 230, delay: i * 55 });
+  }
+  return out;
+})();
 
 /**
  * Footer — defaults to a quiet dark variant everywhere, but switches to the
@@ -72,13 +84,16 @@ export function Footer() {
           </div>
           <p className="font-handwritten text-xl flex items-center gap-2" style={{ color: "#230F2C" }}>
             Hand-drawn with
-            <Image
-              src="/images/icons/Heart .png"
-              alt="love"
-              width={24}
-              height={24}
-              className="inline-block"
-            />
+            <span className="relative group inline-block" style={{ width: 24, height: 24 }}>
+              <Image
+                src="/images/icons/Heart .png"
+                alt="love"
+                width={24}
+                height={24}
+                className="inline-block"
+              />
+              <RadiatingBolts color="white" scale={0.12} bolts={HEART_BOLTS} />
+            </span>
             in TLV
           </p>
           <div className="flex-1 flex justify-end">
