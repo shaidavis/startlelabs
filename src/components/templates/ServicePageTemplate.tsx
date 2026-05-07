@@ -86,6 +86,24 @@ const PAGE_BG = "#f2f1fa";
 const STATS_BG = "#e7e6f2";
 const YELLOW = "#efce25";
 
+/* Cross-sell banner art — one pair (idle / hover) per service slug.
+   Loaded as <img> tags rather than CSS bg so we can swap them with a
+   simple group-hover opacity crossfade. */
+const CROSS_SELL_BANNERS: Record<string, { idle: string; hover: string }> = {
+  "brand-strategy": {
+    idle: "/images/banners/Branding%20Idle.svg",
+    hover: "/images/banners/Branding%20Hover.svg",
+  },
+  "creative-direction": {
+    idle: "/images/banners/Presentations%20Idle.png",
+    hover: "/images/banners/Presentations%20Hover.png",
+  },
+  "digital-design": {
+    idle: "/images/banners/Websites%20Idle.png",
+    hover: "/images/banners/Websites%20Hover.png",
+  },
+};
+
 const GRUNGE: CSSProperties = {
   backgroundImage: "url(/images/backgrounds/HeroGrunge.png)",
   backgroundSize: "cover",
@@ -715,26 +733,47 @@ export function ServicePageTemplate({ service }: Props) {
           <p className="text-xs sm:text-sm uppercase tracking-[0.2em] opacity-70 mb-8">
             Also from Startle Labs
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {related.map((r) => (
-              <Link
-                key={r.slug}
-                href={`/services/${r.slug}`}
-                className="group relative overflow-hidden rounded-xl p-10 text-white transition-transform hover:-translate-y-1"
-                style={{ backgroundColor: r.accentColor }}
-              >
-                <p className="text-xs uppercase tracking-[0.2em] text-white/75 mb-3">
-                  {r.title}
-                </p>
-                <h3 className="text-2xl sm:text-3xl font-headline leading-tight whitespace-pre-line">
-                  {r.headline}
-                </h3>
-                <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold">
-                  {r.cta.text}
-                  <span aria-hidden>→</span>
-                </div>
-              </Link>
-            ))}
+          <div className="flex flex-col gap-8 max-w-5xl mx-auto">
+            {related.map((r) => {
+              const banner = CROSS_SELL_BANNERS[r.slug];
+              if (!banner) return null;
+              return (
+                <Link
+                  key={r.slug}
+                  href={`/services/${r.slug}`}
+                  className="group relative block overflow-hidden transition-transform hover:-translate-y-1"
+                  aria-label={`${r.title} — ${r.cta.text}`}
+                >
+                  {/* Idle banner art — fades out on hover. */}
+                  <img
+                    src={banner.idle}
+                    alt=""
+                    aria-hidden
+                    className="block w-full h-auto select-none pointer-events-none transition-opacity duration-200 group-hover:opacity-0"
+                  />
+                  {/* Hover banner art — pinned to the same box, fades in. */}
+                  <img
+                    src={banner.hover}
+                    alt=""
+                    aria-hidden
+                    className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                  />
+                  {/* Text + squiggle arrow overlay, anchored to the right
+                      half of the banner where the figure leaves whitespace. */}
+                  <div className="absolute right-[6%] top-1/2 -translate-y-1/2 w-[44%] max-w-md text-white">
+                    <h3 className="font-headline text-2xl sm:text-3xl md:text-4xl leading-tight whitespace-pre-line">
+                      {r.headline}
+                    </h3>
+                    <img
+                      src="/images/accents/arrow-3.png"
+                      alt=""
+                      aria-hidden
+                      className="mt-4 w-20 sm:w-28 md:w-32 h-auto select-none pointer-events-none"
+                    />
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}
