@@ -659,7 +659,7 @@ export function ServicePageTemplate({ service }: Props) {
           drawn reversed hero artwork on the left, short title + body +
           yellow pill button on the right. */}
       <section
-        className="relative px-8 sm:px-16 md:px-24 lg:px-32 py-24"
+        className="relative px-8 sm:px-16 md:px-24 lg:px-32 py-24 overflow-visible"
         style={{ backgroundColor: DARK, color: "#ffffff" }}
       >
         <TornEdge
@@ -667,16 +667,19 @@ export function ServicePageTemplate({ service }: Props) {
           customPath={FIGMA_TORN.closingCtaTop.path}
           viewBoxHeight={FIGMA_TORN.closingCtaTop.viewBoxHeight}
         />
-        <div className="relative z-10 flex flex-col items-center gap-12 max-w-6xl mx-auto">
-          {/* Yellow grunge Startle Labs lockup — same on every service CTA. */}
-          <img
-            src="/images/logos/SL%20logo%20grunge%20yellow.png"
-            alt=""
-            aria-hidden
-            className="w-full max-w-[1200px] h-auto"
-          />
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+          {/* Yellow grunge Startle Labs lockup — sized so the bolt's tail
+              spills past the torn bottom edge into the section below. */}
+          <div className="relative flex justify-center md:justify-start">
+            <img
+              src="/images/logos/SL%20logo%20grunge%20yellow.png"
+              alt=""
+              aria-hidden
+              className="w-full max-w-[480px] h-auto translate-y-[18%] pointer-events-none select-none"
+            />
+          </div>
 
-          <div className="text-center">
+          <div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline mb-6 text-white">
               {service.closingCta.title}
             </h2>
