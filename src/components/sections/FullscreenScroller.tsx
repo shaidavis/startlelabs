@@ -9,6 +9,7 @@ import {
 } from "framer-motion";
 import type { Service } from "@/data/services";
 import { RadiatingBolts } from "@/components/effects/RadiatingBolts";
+import { ValuesVennHero } from "@/components/about/ValuesVennHero";
 
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
@@ -624,26 +625,33 @@ function AboutPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
       className="absolute inset-0 flex items-center justify-center px-8"
       style={GRUNGE_BG("#FF733C")}
     >
-      <div className="text-center max-w-3xl">
-        <h2
-          ref={h2Ref}
-          className="text-4xl md:text-6xl font-headline text-[#230F2C] mb-6 will-change-transform"
-        >
-          About Startle Labs
-        </h2>
-        <p
-          ref={subRef}
-          className="text-lg text-[#230F2C]/80 mb-8 will-change-transform"
-        >
-          We&apos;re a branding and creative agency that believes connection isn&apos;t a skill — it&apos;s a choice.
-        </p>
-        <a
-          ref={ctaRef}
-          href="/about"
-          className="px-8 py-4 bg-[#230F2C] text-white font-medium rounded-full hover:bg-[#230F2C]/80 transition-colors inline-block will-change-transform"
-        >
-          Learn More
-        </a>
+      <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16 max-w-6xl">
+        <ValuesVennHero
+          size="large"
+          speed="slow"
+          scrollTrigger={{ scrollYProgress, snapPoint, sectionSpan }}
+        />
+        <div className="text-center md:text-left max-w-xl">
+          <h2
+            ref={h2Ref}
+            className="text-4xl md:text-6xl font-headline text-[#230F2C] mb-6 will-change-transform"
+          >
+            About Startle Labs
+          </h2>
+          <p
+            ref={subRef}
+            className="text-lg text-[#230F2C]/80 mb-8 will-change-transform"
+          >
+            We&apos;re a branding and creative agency that believes connection isn&apos;t a skill — it&apos;s a choice.
+          </p>
+          <a
+            ref={ctaRef}
+            href="/about"
+            className="px-8 py-4 bg-[#230F2C] text-white font-medium rounded-full hover:bg-[#230F2C]/80 transition-colors inline-block will-change-transform"
+          >
+            Learn More
+          </a>
+        </div>
       </div>
     </div>
   );

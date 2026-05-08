@@ -75,25 +75,34 @@
 }
 
 @keyframes cta-arrow-bounce {
-  0%, 100% { transform: translateX(0); }
-  50%      { transform: translateX(7px); }
+  /* rotate(90deg) first so translateX operates in the rotated frame,
+     meaning positive X = visually downward. */
+  0%, 100% { transform: rotate(90deg) translateX(0); }
+  50%      { transform: rotate(90deg) translateX(7px); }
 }
 
 /* Service panel CTA button arrow — masked arrow-4.png, dark ink color,
-   slowly bouncing rightward to invite a click. */
+   pointing downward and bouncing down to invite scrolling/clicking.
+   The element's natural box is 34×14 (horizontal, matching the PNG ratio)
+   which becomes 14px wide × 34px tall after 90° rotation.
+   mask-size: auto 100% fixes the mask at 14px height (≈54px natural width);
+   mask-position: right shows the arrowhead side and crops the tail. */
 .cta-arrow {
   display: inline-block;
-  width: 52px;
+  width: 34px;
   height: 14px;
   background-color: #230F2C;
   -webkit-mask-image: url(/images/accents/arrow-4.png);
           mask-image: url(/images/accents/arrow-4.png);
-  -webkit-mask-size: contain;
-          mask-size: contain;
+  -webkit-mask-size: auto 100%;
+          mask-size: auto 100%;
   -webkit-mask-repeat: no-repeat;
           mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-          mask-position: center;
+  -webkit-mask-position: right center;
+          mask-position: right center;
+  /* Compensate layout box: visual is 14×34, layout box is 34×14.
+     margin: (34-14)/2 = 10px top/bottom, -10px left/right. */
+  margin: 10px -10px;
   animation: cta-arrow-bounce 1.6s ease-in-out infinite;
 }
 
