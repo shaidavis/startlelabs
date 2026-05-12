@@ -1133,7 +1133,7 @@ function TopNav({
   // moves into the next panel. Mirrors Topbar's pastHero threshold so the
   // navbar + icon row arrive together. useTransform driven by the same
   // scrollYProgress so we don't need a second window scroll listener.
-  const navOpacity = useTransform(scrollYProgress, [heroSpan * 0.7, heroSpan * 0.9], [0, 1]);
+  const navOpacity = useTransform(scrollYProgress, [0, heroSpan * 0.7, heroSpan * 0.9, 1], [0, 0, 1, 1]);
 
   return (
     <motion.div
