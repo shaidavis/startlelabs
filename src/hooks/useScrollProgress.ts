@@ -1,7 +1,6 @@
 "use client";
 
-import { useScroll, useTransform, type MotionValue } from "framer-motion";
-import { useRef } from "react";
+import { useScroll } from "framer-motion";
 
 export function useScrollProgress(containerRef?: React.RefObject<HTMLElement | null>) {
   const { scrollYProgress } = useScroll(
@@ -9,12 +8,4 @@ export function useScrollProgress(containerRef?: React.RefObject<HTMLElement | n
   );
 
   return scrollYProgress;
-}
-
-export function useScrollRange(
-  scrollYProgress: MotionValue<number>,
-  inputRange: number[],
-  outputRange: number[]
-) {
-  return useTransform(scrollYProgress, inputRange, outputRange);
 }
