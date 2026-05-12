@@ -7,7 +7,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { TornEdge } from "@/components/ui/TornEdge";
 import { PageTransition } from "@/components/layout/PageTransition";
-import type { AboutData, Review, Milestone } from "@/data/about";
+import type { AboutData, Review } from "@/data/about";
 
 const GRUNGE: CSSProperties = {
   backgroundImage: "url(/images/backgrounds/HeroGrunge.png)",
@@ -106,7 +106,33 @@ export function AboutTemplate({ data }: { data: AboutData }) {
           </div>
         </section>
 
-        {/* ─── 2. Story (PAGE_BG → stats-style seam) ────────── */}
+        {/* ─── 2. Reviews (3-column vertical marquee) ───────── */}
+        <section
+          className="relative pt-24 sm:pt-28 pb-24 sm:pb-28"
+          style={{ backgroundColor: STATS_BG, ...GRUNGE }}
+        >
+          <TornEdge
+            color={STATS_BG}
+            customPath={FIGMA_TORN.deliverablesTop.path}
+            viewBoxHeight={FIGMA_TORN.deliverablesTop.h}
+            grunge
+          />
+          <div className="relative z-10 max-w-6xl mx-auto px-8 sm:px-16 md:px-24 lg:px-32 mb-12 text-center">
+            <div
+              className="text-xs uppercase tracking-[0.18em] font-semibold mb-3"
+              style={{ color: ORANGE }}
+            >
+              What clients say
+            </div>
+            <h2 className="font-headline text-3xl md:text-4xl leading-tight max-w-2xl mx-auto">
+              Kind words from the people we build for.
+            </h2>
+          </div>
+
+          <ReviewsMarquee reviews={data.reviews} fadeColor={STATS_BG} />
+        </section>
+
+        {/* ─── 3. Story (PAGE_BG) ────────────────────────────── */}
         <section
           className="relative px-8 sm:px-16 md:px-24 lg:px-32 pt-24 sm:pt-28 pb-24 sm:pb-28"
           style={{ backgroundColor: PAGE_BG }}
@@ -163,36 +189,6 @@ export function AboutTemplate({ data }: { data: AboutData }) {
               </div>
             ))}
           </div>
-        </section>
-
-        {/* ─── 3. Reviews (3-column vertical marquee) ─────────
-            Outer columns scroll DOWN, middle column scrolls UP — an
-            infinite conveyor belt framed by gradient fades at the top
-            and bottom of the window. Matches the reference wireframe
-            where each of the 3 columns ticks independently. */}
-        <section
-          className="relative pt-24 sm:pt-28 pb-24 sm:pb-28"
-          style={{ backgroundColor: STATS_BG, ...GRUNGE }}
-        >
-          <TornEdge
-            color={STATS_BG}
-            customPath={FIGMA_TORN.deliverablesTop.path}
-            viewBoxHeight={FIGMA_TORN.deliverablesTop.h}
-            grunge
-          />
-          <div className="relative z-10 max-w-6xl mx-auto px-8 sm:px-16 md:px-24 lg:px-32 mb-12 text-center">
-            <div
-              className="text-xs uppercase tracking-[0.18em] font-semibold mb-3"
-              style={{ color: ORANGE }}
-            >
-              What clients say
-            </div>
-            <h2 className="font-headline text-3xl md:text-4xl leading-tight max-w-2xl mx-auto">
-              Kind words from the people we build for.
-            </h2>
-          </div>
-
-          <ReviewsMarquee reviews={data.reviews} fadeColor={STATS_BG} />
         </section>
 
         {/* ─── 4. Values (4 text blocks, WHITE) ───────────── */}
@@ -299,32 +295,6 @@ export function AboutTemplate({ data }: { data: AboutData }) {
           </div>
         </section>
 
-        {/* ─── 6. Timeline (dynamic, PAGE_BG) ──────────────── */}
-        <section
-          className="relative px-8 sm:px-16 md:px-24 lg:px-32 pt-28 sm:pt-32 pb-28 sm:pb-32"
-          style={{ backgroundColor: PAGE_BG }}
-        >
-          <TornEdge
-            color={PAGE_BG}
-            customPath={FIGMA_TORN.principlesTop.path}
-            viewBoxHeight={FIGMA_TORN.principlesTop.h}
-          />
-          <div className="relative z-10 max-w-4xl mx-auto">
-            <div className="mb-14 text-center">
-              <div
-                className="text-xs uppercase tracking-[0.18em] font-semibold mb-3"
-                style={{ color: ORANGE }}
-              >
-                Our story so far
-              </div>
-              <h2 className="font-headline text-3xl md:text-4xl leading-tight">
-                {data.timeline.heading}
-              </h2>
-            </div>
-
-            <Timeline milestones={data.timeline.milestones} />
-          </div>
-        </section>
 
         {/* ─── 7. Portfolio (Notion embed, WHITE) ──────────── */}
         <section
@@ -564,33 +534,38 @@ function ReviewsMarquee({
         ))}
       </div>
 
-      {/* md+: 3-column marquee window.
-          `group` + `group-hover:[animation-play-state:paused]` on each
-          column freezes ALL 3 columns when the user hovers anywhere in
-          the window, so they can read a card without content sliding
-          past underneath. */}
       <div className="hidden md:block relative mx-auto max-w-6xl px-8 md:px-12 lg:px-16">
         <div
-          className="group relative overflow-hidden"
+          className="relative overflow-hidden"
           style={{ height: 640 }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('.marquee-track').forEach(el => {
+              el.style.animationDuration = el.dataset.hoverDur!;
+            });
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('.marquee-track').forEach(el => {
+              el.style.animationDuration = el.dataset.baseDur!;
+            });
+          }}
         >
           <div className="grid grid-cols-3 gap-5 h-full">
             <MarqueeColumn
               items={columns[0]}
               direction="down"
-              duration={140}
+              duration={70}
               reduceMotion={!!shouldReduce}
             />
             <MarqueeColumn
               items={columns[1]}
               direction="up"
-              duration={160}
+              duration={80}
               reduceMotion={!!shouldReduce}
             />
             <MarqueeColumn
               items={columns[2]}
               direction="down"
-              duration={150}
+              duration={75}
               reduceMotion={!!shouldReduce}
             />
           </div>
@@ -651,11 +626,10 @@ function MarqueeColumn({
   return (
     <div className="relative">
       <div
-        className="flex flex-col gap-5 will-change-transform group-hover:[animation-play-state:paused]"
+        className="marquee-track flex flex-col gap-5 will-change-transform"
+        data-base-dur={`${duration}s`}
+        data-hover-dur={`${duration * 3}s`}
         style={{
-          // Use individual properties, NOT the `animation` shorthand —
-          // the shorthand implicitly sets animation-play-state:running
-          // inline, which would beat the group-hover stylesheet rule.
           animationName,
           animationDuration: `${duration}s`,
           animationTimingFunction: "linear",
@@ -670,79 +644,3 @@ function MarqueeColumn({
   );
 }
 
-// ─── Dynamic vertical timeline ──────────────────────────────────
-// Vertical line down the middle with alternating left/right cards,
-// colored dot per milestone, framer-motion scroll reveal. Matches
-// the "more dynamic" treatment called out against the flat rows in
-// the wireframe.
-function Timeline({ milestones }: { milestones: Milestone[] }) {
-  return (
-    <div className="relative">
-      {/* Center line */}
-      <div
-        aria-hidden
-        className="absolute left-4 md:left-1/2 top-2 bottom-2 w-px md:-translate-x-px"
-        style={{
-          background: `repeating-linear-gradient(to bottom, ${ORANGE}55 0 6px, transparent 6px 12px)`,
-        }}
-      />
-
-      <motion.ul
-        className="space-y-12 md:space-y-16"
-        variants={staggerContainer}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-60px" }}
-      >
-        {milestones.map((m, i) => {
-          const onRight = i % 2 === 1;
-          return (
-            <motion.li
-              key={i}
-              variants={fadeInUp}
-              className="relative md:grid md:grid-cols-2 md:gap-12 items-center"
-            >
-              {/* Dot */}
-              <span
-                aria-hidden
-                className="absolute left-4 md:left-1/2 top-2 w-3 h-3 rounded-full md:-translate-x-1/2 ring-4"
-                style={{
-                  background: ORANGE,
-                  boxShadow: `0 0 0 4px ${PAGE_BG}`,
-                }}
-              />
-
-              {/* Card — left column on even indices, right on odd */}
-              <div
-                className={
-                  onRight
-                    ? "md:col-start-2 pl-10 md:pl-12"
-                    : "md:col-start-1 md:text-right pl-10 md:pl-0 md:pr-12"
-                }
-              >
-                {m.tag && (
-                  <div
-                    className="inline-block text-[10px] uppercase tracking-[0.18em] font-semibold px-2 py-1 rounded-full mb-3"
-                    style={{ background: `${ORANGE}1a`, color: ORANGE }}
-                  >
-                    {m.tag}
-                  </div>
-                )}
-                <div
-                  className="font-headline text-3xl md:text-4xl leading-none mb-2"
-                  style={{ color: ORANGE }}
-                >
-                  {m.date}
-                </div>
-                <h3 className="font-semibold text-lg mb-2">{m.heading}</h3>
-                <p className="text-sm text-neutral-500 leading-relaxed">
-                  {m.body}
-                </p>
-              </div>
-            </motion.li>
-          );
-        })}
-      </motion.ul>
-    </div>
-  );
-}
