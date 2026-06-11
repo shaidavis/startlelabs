@@ -300,34 +300,26 @@ export function Topbar() {
                   href="/#contact"
                   scroll={false}
                   onClick={handleYallaClick}
-                  className="relative group hidden sm:inline-flex items-center px-4 sm:px-5 py-1.5 text-[#230F2C]"
+                  className="relative group hidden sm:inline-flex items-center pl-7 pr-5 pt-4 pb-3 sm:pl-8 sm:pr-6 text-[#230F2C]"
                 >
-                  {/* Hand-drawn pill border — the CTA's resting state. The
-                      stadium path is intentionally a little wobbly/overshot so
-                      it reads as sketched; `vectorEffect=non-scaling-stroke`
-                      keeps the ink an even weight however the box stretches.
-                      Fades out on hover (and on /contact, where the burst is
-                      pinned on) so the explosion has the stage to itself. */}
-                  <svg
+                  {/* Hand-drawn white blob — the CTA's resting backdrop. Same
+                      puck artwork and opacity as the nav icon pucks
+                      (SectionNav: object-contain, opacity-30), but stretched
+                      oblong via `object-fill` to wrap "Yalla!" instead of
+                      sitting as a circle. The button padding gives the word
+                      breathing room inside the puck's opaque centre. Fades out
+                      on hover (and on /contact, where the burst is pinned on)
+                      so the explosion has the stage to itself. */}
+                  <img
+                    src="/images/shapes/Untitled_Artwork%203.png"
+                    alt=""
                     aria-hidden
-                    viewBox="0 0 200 64"
-                    preserveAspectRatio="none"
-                    fill="none"
-                    className={`pointer-events-none absolute inset-0 h-full w-full overflow-visible transition-opacity duration-200 ease-out ${
+                    className={`pointer-events-none absolute inset-0 h-full w-full select-none object-fill transition-opacity duration-200 ease-out ${
                       pathname === "/contact"
                         ? "opacity-0"
-                        : "opacity-100 group-hover:opacity-0 group-focus-visible:opacity-0"
+                        : "opacity-50 group-hover:opacity-0 group-focus-visible:opacity-0"
                     }`}
-                  >
-                    <path
-                      d="M42 7 C 86 3.6 132 4.4 168 7.6 C 189 9.6 197.5 19 196.6 32 C 195.8 45 188 55 167 57.6 C 130 60.6 80 59.4 37 57.4 C 15 56 3.4 45 4.6 31.5 C 5.6 18 15.5 8.4 46 6.6"
-                      stroke="#230F2C"
-                      strokeWidth={2.4}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  </svg>
+                  />
 
                   <span
                     aria-hidden

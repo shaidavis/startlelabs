@@ -62,8 +62,8 @@ const R = 128;
 // bit0 = Connection, bit1 = Curiosity, bit2 = Confidence
 const BLOBS: Blob[] = [
   { name: "Connection", x: 280, y: 175, color: "#F84267", rgb: [248, 66, 103], anchor: [280, 112], phase: [0.4, 1.7, 3.1], writeAt: 500, icon: "/images/icons/Heart%20.png" },
-  { name: "Curiosity", x: 210, y: 302, color: "#2E9BD6", rgb: [46, 155, 214], anchor: [176, 372], phase: [2.1, 0.6, 4.4], writeAt: 1350, icon: "/images/icons/Eye.png" },
-  { name: "Confidence", x: 350, y: 302, color: "#13B98C", rgb: [19, 185, 140], anchor: [384, 372], phase: [1.2, 3.3, 0.9], writeAt: 2200, icon: "/images/icons/Crown%20copy.png" },
+  { name: "Curiosity", x: 210, y: 302, color: "#2E9BD6", rgb: [46, 155, 214], anchor: [186, 340], phase: [2.1, 0.6, 4.4], writeAt: 1350, icon: "/images/icons/Eye.png" },
+  { name: "Confidence", x: 350, y: 302, color: "#13B98C", rgb: [19, 185, 140], anchor: [374, 340], phase: [1.2, 3.3, 0.9], writeAt: 2200, icon: "/images/icons/Crown%20copy.png" },
 ];
 
 const CENTER: [number, number] = [280, 250];
@@ -76,6 +76,17 @@ const LENSES: { mask: number; name: string; anchor: [number, number]; writeAt: n
   { mask: 6, name: "Artistry", anchor: [280, 328], writeAt: 4140 }, // Curiosity × Confidence
   { mask: 3, name: "Empathy", anchor: [200, 214], writeAt: 4680 }, // Connection × Curiosity
 ];
+
+// Intersection fill colours — deliberately distinct jewel tones, NOT blends of
+// the parent blobs. Source-over overlap of two ~0.85-alpha circles just reads
+// as a tinted version of the top one, so each lens gets its own painted colour
+// instead. Keyed by region bitmask (see the BLOBS bit map above).
+const LENS_FILL: Record<number, [number, number, number]> = {
+  3: [94, 77, 194], // Empathy — Connection × Curiosity → indigo-violet
+  5: [198, 58, 128], // Leadership — Connection × Confidence → magenta
+  6: [14, 156, 162], // Artistry — Curiosity × Confidence → teal
+  7: [242, 170, 28], // Creativity core — all three → gold (yellow glow on top)
+};
 
 // hover reveal — the "formula" for each region
 const FORMULA: Record<number, string> = {
@@ -208,30 +219,73 @@ export function InteractiveVennCanvas({ chrome = true, caption = true, replayNon
         hoverP[i] = prefersReduce ? target : lerp(hoverP[i], target, 0.16);
       }
 
+      // Per-blob render params, shared by the base fills, the intersection
+      // clips, and the outlines so all three track the same wobble/surge.
+      const scales: number[] = [0, 0, 0];
+      const alives: number[] = [0, 0, 0];
+      for (let i = 0; i < 3; i++) {
+        alives[i] = Math.max(hoverP[i], exciteP);
+        scales[i] = (0.25 + 0.75 * introP[i]) * (1 + 0.16 * hoverP[i] + 0.06 * exciteP);
+      }
+
+      // 1) Base blob fills + grunge texture.
       for (let i = 0; i < 3; i++) {
         const p = introP[i];
         if (p <= 0.001) continue;
         const b = BLOBS[i];
-        const alive = Math.max(hoverP[i], exciteP);
-        const scale = (0.25 + 0.75 * p) * (1 + 0.16 * hoverP[i] + 0.06 * exciteP);
-
-        traceBlob(b, scale, alive);
+        traceBlob(b, scales[i], alives[i]);
         ctx.fillStyle = `rgba(${b.rgb[0]},${b.rgb[1]},${b.rgb[2]},${(0.85 + 0.1 * hoverP[i]) * p})`;
         ctx.fill();
 
         if (grungeReady) {
           ctx.save();
-          traceBlob(b, scale, alive);
+          traceBlob(b, scales[i], alives[i]);
           ctx.clip();
           ctx.globalCompositeOperation = "multiply";
           ctx.globalAlpha = 0.5 * p;
-          ctx.drawImage(grunge, 0, 0, 300, 300 * (grunge.height / grunge.width || 0.66), b.x - R * scale, b.y - R * scale, R * scale * 2, R * scale * 2);
+          ctx.drawImage(grunge, 0, 0, 300, 300 * (grunge.height / grunge.width || 0.66), b.x - R * scales[i], b.y - R * scales[i], R * scales[i] * 2, R * scales[i] * 2);
           ctx.restore();
           ctx.globalAlpha = 1;
           ctx.globalCompositeOperation = "source-over";
         }
+      }
 
-        traceBlob(b, scale, alive);
+      // 2) Intersection fills. Clip to every parent blob (canvas clips
+      //    intersect) and paint a deliberate distinct colour so each lens is
+      //    its own region, not a tinted parent. Pairs first, triple centre on
+      //    top. Fades in with the latest-arriving parent blob.
+      const fillLens = (idxs: number[], rgb: [number, number, number]) => {
+        const introMin = Math.min(...idxs.map((k) => introP[k]));
+        if (introMin <= 0.02) return;
+        const hov = idxs.reduce((m, k) => m | (1 << k), 0);
+        const lift = hovered === hov ? 1 : 0;
+        ctx.save();
+        for (const k of idxs) {
+          traceBlob(BLOBS[k], scales[k], alives[k]);
+          ctx.clip();
+        }
+        ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${(0.93 + 0.06 * lift) * introMin})`;
+        ctx.fillRect(0, 0, W, H);
+        if (grungeReady) {
+          ctx.globalCompositeOperation = "multiply";
+          ctx.globalAlpha = 0.42 * introMin;
+          ctx.drawImage(grunge, 0, 0, W, H);
+          ctx.globalAlpha = 1;
+          ctx.globalCompositeOperation = "source-over";
+        }
+        ctx.restore();
+      };
+      fillLens([0, 1], LENS_FILL[3]); // Empathy    (Connection × Curiosity)
+      fillLens([0, 2], LENS_FILL[5]); // Leadership (Connection × Confidence)
+      fillLens([1, 2], LENS_FILL[6]); // Artistry   (Curiosity × Confidence)
+      fillLens([0, 1, 2], LENS_FILL[7]); // Creativity core (under the yellow glow)
+
+      // 3) Blob outlines, on top so each circle stays crisp through the lenses.
+      for (let i = 0; i < 3; i++) {
+        const p = introP[i];
+        if (p <= 0.001) continue;
+        const b = BLOBS[i];
+        traceBlob(b, scales[i], alives[i]);
         ctx.lineWidth = 1.25 + 1.75 * hoverP[i];
         ctx.strokeStyle = `rgba(${b.rgb[0]},${b.rgb[1]},${b.rgb[2]},${(0.7 + 0.3 * hoverP[i]) * p})`;
         ctx.stroke();
