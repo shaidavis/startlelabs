@@ -63,8 +63,8 @@ export function Footer() {
           grunge
         />
         {/* Single row: logo | handwriting (center) | LinkedIn */}
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
-          <div className="flex items-center gap-3 flex-1">
+        <div className="max-w-7xl mx-auto flex items-baseline justify-between gap-6">
+          <div className="flex items-baseline gap-3 flex-1">
             <span
               aria-hidden
               className="block h-7 w-7 shrink-0"
@@ -82,7 +82,7 @@ export function Footer() {
             />
             <span className="font-headline text-2xl leading-none">Startle Labs</span>
           </div>
-          <p className="font-handwritten text-xl flex items-center gap-2" style={{ color: "#230F2C" }}>
+          <div className="font-handwritten text-xl flex items-center gap-2" style={{ color: "#230F2C" }}>
             Hand-drawn with
             <span className="relative group inline-block" style={{ width: 24, height: 24 }}>
               <Image
@@ -95,7 +95,7 @@ export function Footer() {
               <RadiatingBolts color="white" scale={0.12} bolts={HEART_BOLTS} />
             </span>
             in TLV
-          </p>
+          </div>
           <div className="flex-1 flex justify-end">
             <a href="https://linkedin.com/in/shaidavis" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm uppercase tracking-[0.2em] font-semibold hover:opacity-70 transition-opacity">
               LinkedIn

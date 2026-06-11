@@ -9,7 +9,8 @@ import {
 } from "framer-motion";
 import type { Service } from "@/data/services";
 import { RadiatingBolts } from "@/components/effects/RadiatingBolts";
-import { ValuesVennHero } from "@/components/about/ValuesVennHero";
+import { InteractiveVennCanvas } from "@/components/about/InteractiveVennCanvas";
+import { HERO_EXTRA_VH, HERO_COLLAPSE_VH, HERO_RESOLVE_PORTION } from "./heroTiming";
 
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
@@ -110,11 +111,10 @@ interface PanelProps {
 }
 
 // Word wheel order — "success" is intentionally the FINAL resolution so the
-// cycle always lands on it naturally as the user scrolls through the hero.
-// Do not reorder without also updating the closing frame of the animation
-// (the `hasLeftHeroRef` branch pins to SUCCESS_INDEX on back-scrolls).
+// cycle lands on it just as the resolve phase begins. The wheel is driven
+// purely by scroll position (no latched end state), so scrolling back up runs
+// the same cycle in reverse, frame-for-frame.
 const SCROLL_WORDS = ["teams", "users", "investors", "vision", "innovation", "joy", "success"];
-const SUCCESS_INDEX = SCROLL_WORDS.indexOf("success"); // always last
 
 function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
   const rowRef = useRef<HTMLDivElement>(null);
@@ -125,28 +125,28 @@ function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
   const [wordHeight, setWordHeight] = useState(56);
   const [maxWordWidth, setMaxWordWidth] = useState(200);
   const [isMobile, setIsMobile] = useState(false);
-  const hasLeftHeroRef = useRef(false);
 
   // Three-phase hero timeline, expressed in units of a normal section span:
-  //   expand (HERO_COLLAPSE_VH) → word cycling (HERO_EXTRA_VH) → slide-out (1)
+  //   word cycling (HERO_EXTRA_VH) → resolve/collapse (HERO_COLLAPSE_VH) → slide-out (1)
   //
-  // Phase 1 (expand): initial state reads "Creativity that inspires." with
-  //   the period flush against the tagline. As the user starts scrolling,
-  //   the underline (desktop) grows outwards pushing the period rightward,
-  //   and once the column is ~half-grown the word wheel begins fading in.
-  // Phase 2 (cycle): the wheel cycles through SCROLL_WORDS, landing on
-  //   "success" as the final word at the end of the phase.
+  // Phase 1 (cycle): initial state reads "Creativity that inspires ______."
+  //   — the column/underline is drawn (period pushed right) but the words are
+  //   INVISIBLE. As the user scrolls the wheel fades in and pushes up,
+  //   cycling through SCROLL_WORDS and landing on "success" at the end.
+  // Phase 2 (resolve): the wheel fades out and the column collapses back to
+  //   0, retracting the underline and pulling the period flush so the line
+  //   distills to the clean "Creativity that inspires." Collapse finishes a
+  //   beat before the slide-out so the clean punchline holds briefly.
   // Phase 3 (slide-out): the whole row flies off to the left and the first
   //   service panel slides in from the right.
   //
-  // Reuses the same span constants as the old timeline so total scroll
-  // distance through the hero is unchanged — we're just re-ordering what
-  // happens inside those spans.
+  // Reuses the same span constants so total scroll distance through the hero
+  // is unchanged.
   const normalSpanHero = sectionSpan / (1 + HERO_EXTRA_VH + HERO_COLLAPSE_VH);
-  const expandSpan = normalSpanHero * HERO_COLLAPSE_VH;
-  const wordCycleSpan = normalSpanHero * HERO_EXTRA_VH;
-  const expandEnd = snapPoint + expandSpan;
-  const cycleEnd = expandEnd + wordCycleSpan;
+  const cycleSpan = normalSpanHero * HERO_EXTRA_VH;
+  const collapseSpan = normalSpanHero * HERO_COLLAPSE_VH;
+  const cycleEnd = snapPoint + cycleSpan;
+  const collapseEnd = cycleEnd + collapseSpan;
 
   // Detect mobile (below sm breakpoint = 810px). useLayoutEffect so the
   // detection commits before paint — otherwise on mobile, the user briefly
@@ -160,19 +160,19 @@ function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  // Row slide-out: fully in place through expand + cycle, then flies off
-  // to the left once the user scrolls past the end of the cycle phase.
+  // Row slide-out: fully in place through cycle + resolve, then flies off
+  // to the left once the user scrolls past the end of the resolve phase.
   // useLayoutEffect so the initial state lands before first paint.
   useLayoutEffect(() => {
     const el = rowRef.current;
     if (!el) return;
 
     const update = (v: number) => {
-      if (v <= cycleEnd) {
+      if (v <= collapseEnd) {
         el.style.opacity = "1";
         el.style.transform = "translateX(0px)";
       } else {
-        const normalized = (v - cycleEnd) / normalSpanHero;
+        const normalized = (v - collapseEnd) / normalSpanHero;
         // Accelerating parallax: quadratic ramp matches service panels
         const x = -(normalized * normalized) * 250;
         const opacity = Math.max(0, 1 - normalized * 1.5);
@@ -183,50 +183,68 @@ function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
 
     update(scrollYProgress.get());
     return scrollYProgress.on("change", update);
-  }, [scrollYProgress, cycleEnd, normalSpanHero]);
+  }, [scrollYProgress, collapseEnd, normalSpanHero]);
 
-  // Expand: grow the scroll-word column out from 0 (desktop) or crossfade
-  // the inline period → word stack (mobile). Inverse direction of the old
-  // "collapse" phase — this now happens at the START of the hero, not the
-  // end, so the initial state reads "Creativity that inspires." (period
-  // flush) and scrolling reveals the wheel.
+  // Resolve/collapse: shrink the scroll-word column back to 0 (desktop) or
+  // crossfade the word stack → inline period (mobile). This happens at the
+  // END of the hero (after word cycling), so the line distills from
+  // "Creativity that inspires <word>" down to the clean "Creativity that
+  // inspires." before the row slides away.
   //
-  // Desktop splits the phase in two: the underline/column grows first,
-  // pushing the period rightward; the wheel opacity ramps up a beat later
-  // so the words appear to "land" inside an already-drawn line.
+  // Driven by an "expansion" value: 1 = fully open (wheel shown), 0 =
+  // collapsed (clean). It holds at 1 through the cycle phase, ramps 1 → 0
+  // across the resolve phase, then stays 0 through the slide-out. We feed it
+  // straight into the same grow/fade mapping the reveal used, so the resolve
+  // is a clean reverse-playback: words fade as the column retracts.
   //
-  // useLayoutEffect: the JSX initial styles are set to the v=0 collapsed
+  // useLayoutEffect: the JSX initial styles are set to the v=0 expanded
   // state, and this effect must run synchronously before paint to keep
   // them in sync with the actual scroll position (e.g. a refresh that
   // restored scroll past the hero) — otherwise we'd flash one frame of
-  // collapsed state before the effect catches up.
+  // expanded state before the effect catches up.
   useLayoutEffect(() => {
-    // p: 0 = collapsed (initial state), 1 = fully expanded (cycling-ready)
-    const GROW_PORTION = 0.6; // first 60% grows the column
-    const FADE_START = 0.5; // wheel begins fading in at 50% (slight overlap)
+    const FADE_IN_PORTION = 0.18; // first ~18% of the cycle fades the words in
+    const WHEEL_FADE_PORTION = 0.6; // words clear over the first 60% of the collapse
+    // Active collapse-motion window. The underline retracts over exactly this
+    // span (cycleEnd → resolveEnd); the remaining 40% of the collapse phase is
+    // the punchline hold. The Topbar mirrors this same window for the logo
+    // slide (see HERO_RESOLVE_PORTION in heroTiming) so the two move as one.
+    const resolveSpan = collapseSpan * HERO_RESOLVE_PORTION;
     const smoothstep = (t: number) => t * t * (3 - 2 * t);
 
     const update = (v: number) => {
-      // Before snap: treat as if p=0 (hero fully collapsed, initial state)
-      // During expand phase: p ramps 0 → 1
-      // After expandEnd: pinned at 1 through cycling + slide-out
-      let p = 1;
-      if (v < expandEnd) {
-        p = Math.max(0, Math.min(1, (v - snapPoint) / expandSpan));
+      // Resolve progress t: 0 at cycleEnd (underline full), 1 at resolveEnd
+      // (underline fully retracted). Held at 1 through the hold + slide-out.
+      const t = v <= cycleEnd ? 0 : Math.min(1, (v - cycleEnd) / resolveSpan);
+
+      // Underline width factor: full (1) → 0 across the whole collapse window,
+      // so the line retracts leftward over exactly [cycleEnd, resolveEnd].
+      const widthFactor = 1 - smoothstep(t);
+
+      // Wheel opacity: words start INVISIBLE so the hero loads as
+      // "Creativity that inspires ______." They fade in over the first stretch
+      // of the cycle (and push up via the wheel translate), hold through the
+      // cycle, then fade out over the first WHEEL_FADE_PORTION of the resolve
+      // so they clear before the line finishes retracting.
+      let wheelOp: number;
+      if (v <= cycleEnd) {
+        const cycProg = Math.max(0, (v - snapPoint) / cycleSpan);
+        wheelOp = smoothstep(Math.min(1, cycProg / FADE_IN_PORTION));
+      } else {
+        wheelOp = 1 - smoothstep(Math.min(1, t / WHEEL_FADE_PORTION));
       }
 
       if (isMobile) {
-        // Mobile: stack fades in + slides up into place; inline period fades
-        // out. Period starts visible so the initial tagline reads
-        // "Creativity that inspires." before the user has scrolled.
-        const eased = smoothstep(p);
+        // Mobile: the word stack fades in + pushes up; the inline period
+        // (visible at load so the tagline reads "Creativity that inspires.")
+        // crossfades against it.
         const stack = mobileStackRef.current;
         if (stack) {
-          stack.style.opacity = String(eased);
-          stack.style.transform = `translateY(${(1 - eased) * 14}px)`;
+          stack.style.opacity = String(wheelOp);
+          stack.style.transform = `translateY(${(1 - wheelOp) * 14}px)`;
         }
         const period = inlinePeriodRef.current;
-        if (period) period.style.opacity = String(1 - eased);
+        if (period) period.style.opacity = String(1 - wheelOp);
         // Reset desktop targets in case of viewport swap
         const col = collapseRef.current;
         if (col) {
@@ -238,27 +256,20 @@ function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
         const wheel = wheelRef.current;
         if (wheel) wheel.style.opacity = "";
       } else {
-        const growP = Math.min(1, Math.max(0, p / GROW_PORTION));
-        const fadeP = Math.min(1, Math.max(0, (p - FADE_START) / (1 - FADE_START)));
-        const growEased = smoothstep(growP);
-        const fadeEased = smoothstep(fadeP);
-
-        // Phase A: grow column + margins from 0 → full. Underline is
-        // positioned `left-0 right-0` within the column so it extends with
-        // the width — visually a horizontal line drawing outwards.
+        // Column + underline + margins stay full through the cycle, then
+        // retract to 0 across the collapse window. Underline is `left-0 right-0`
+        // within the column so it shrinks (slides left) with the width.
         const col = collapseRef.current;
         if (col) {
           const baseW = maxWordWidth + 16;
-          col.style.width = `${baseW * growEased}px`;
-          col.style.marginLeft = `${16 * growEased}px`;
-          col.style.marginRight = `${8 * growEased}px`;
+          col.style.width = `${baseW * widthFactor}px`;
+          col.style.marginLeft = `${16 * widthFactor}px`;
+          col.style.marginRight = `${8 * widthFactor}px`;
           col.style.opacity = "1";
         }
 
-        // Phase B: wheel opacity ramps up once the column is ~halfway grown.
-        // Multiplies into the per-word opacities set by the scroll tracker.
         const wheel = wheelRef.current;
-        if (wheel) wheel.style.opacity = String(fadeEased);
+        if (wheel) wheel.style.opacity = String(wheelOp);
 
         // Reset mobile targets
         const stack = mobileStackRef.current;
@@ -273,7 +284,7 @@ function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
 
     update(scrollYProgress.get());
     return scrollYProgress.on("change", update);
-  }, [scrollYProgress, snapPoint, expandSpan, expandEnd, isMobile, maxWordWidth]);
+  }, [scrollYProgress, snapPoint, cycleEnd, cycleSpan, collapseSpan, isMobile, maxWordWidth]);
 
   // Measure word height and max width once. useLayoutEffect so the measured
   // values are available before paint, avoiding a re-flow when wordHeight
@@ -307,36 +318,28 @@ function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
     });
   }, [isMobile]);
 
-  // Track scroll to drive the word wheel + detect when user leaves hero.
+  // Track scroll to drive the word wheel. The wheel index is a pure function
+  // of scroll position — no latched state — so scrolling back up runs the
+  // cycle in reverse, frame-for-frame.
   // useLayoutEffect so the wheel transform/word opacities are set in the
   // same paint as the column expansion — otherwise the wheel briefly
   // flashes word[0] at the wrong translateY before the effect catches up.
   useLayoutEffect(() => {
     const update = (v: number) => {
-      const normalized = (v - snapPoint) / sectionSpan;
-
-      // Detect if user has fully scrolled past hero
-      if (normalized > 1) {
-        hasLeftHeroRef.current = true;
-      }
-
       const el = wheelRef.current;
       if (!el) return;
 
-      let wordIndex: number;
-      if (hasLeftHeroRef.current) {
-        wordIndex = SUCCESS_INDEX;
-      } else {
-        // Word cycling happens in the middle phase of the hero timeline,
-        // starting once the column has fully expanded (expandEnd) and
-        // ending on the last word ("success") at cycleEnd. Clamped so
-        // scrolling further just pins on success.
-        const microProgress = Math.max(
-          0,
-          Math.min(1, (v - expandEnd) / wordCycleSpan)
-        );
-        wordIndex = microProgress * (SCROLL_WORDS.length - 1);
-      }
+      // Word cycling is the OPENING phase of the hero timeline: it runs from
+      // the top (snapPoint) and lands on the last word ("success") at
+      // cycleEnd, just as the resolve phase begins collapsing the column.
+      // Clamped so scrolling into the resolve phase pins on success (which
+      // then fades out with the rest of the wheel), and so scrolling back up
+      // walks the same cycle in reverse.
+      const microProgress = Math.max(
+        0,
+        Math.min(1, (v - snapPoint) / cycleSpan)
+      );
+      const wordIndex = microProgress * (SCROLL_WORDS.length - 1);
 
       if (isMobile) {
         // Mobile: fade between words (no scroll), all words stacked in same spot
@@ -372,7 +375,7 @@ function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
 
     update(scrollYProgress.get());
     return scrollYProgress.on("change", update);
-  }, [scrollYProgress, snapPoint, sectionSpan, expandEnd, wordCycleSpan, wordHeight, isMobile]);
+  }, [scrollYProgress, snapPoint, cycleSpan, wordHeight, isMobile]);
 
   return (
     <div
@@ -386,9 +389,9 @@ function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
         <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-headline tracking-tight text-[#230F2C] whitespace-nowrap shrink-0">
           Creativity that inspires
           {/* Mobile-only inline period. VISIBLE on initial load so the hero
-              reads "Creativity that inspires." before the user scrolls;
-              fades out as the scroll-driven expand phase reveals the word
-              stack below. */}
+              reads "Creativity that inspires." before any scroll; crossfades
+              out as the word stack fades in + pushes up, then fades back in as
+              the stack resolves away. */}
           {isMobile && (
             <span
               ref={inlinePeriodRef}
@@ -403,10 +406,10 @@ function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
         {/* Mobile: word + underline stack below headline (fades out during resolve) */}
         {/* Desktop: scroll wheel column + period (column shrinks during resolve) */}
         {isMobile ? (
-          // Initial style matches the v=0 state computed by the expand
-          // effect (opacity 0, translateY(14px)) so SSR/hydration paints
-          // the collapsed start frame instead of flashing the stack at
-          // full opacity for one frame.
+          // Initial style matches the v=0 state computed by the resolve
+          // effect (opacity 0, translateY(14px)) so SSR/hydration paints the
+          // words-hidden start frame instead of flashing the stack at full
+          // opacity for one paint.
           <div
             ref={mobileStackRef}
             className="flex flex-col items-center w-full will-change-transform"
@@ -436,27 +439,30 @@ function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
           </div>
         ) : (
           <>
-            {/* Scroll-word column — width + margins grow from 0 during the
-                hero's expand phase, then collapse back if the user scrolls
-                back to the top. Initial JSX styles match the v=0 collapsed
-                state (width 0, no margins) so the SSR/hydration paint shows
-                "Creativity that inspires." with the period flush — without
-                this, the column rendered at full width on first paint and
-                then snapped to 0 once the layout effect ran. */}
+            {/* Scroll-word column — opens fully expanded (width + margins at
+                full) so the hero's first paint draws the blank underline of
+                "Creativity that inspires ______." with the period pushed
+                right; the words themselves stay hidden until scroll. The
+                resolve phase shrinks width + margins back to 0, retracting the
+                underline and pulling the period flush. Initial JSX styles
+                match the v=0 expanded state (full width, margins) so
+                SSR/hydration paints the open frame — without this, the column
+                rendered at 0 on first paint and then snapped open once the
+                layout effect ran. */}
             <div
               ref={collapseRef}
               className="relative overflow-visible will-change-[width,margin,opacity]"
               style={{
-                width: 0,
+                width: maxWordWidth + 16,
                 height: wordHeight,
-                marginLeft: 0,
-                marginRight: 0,
+                marginLeft: 16,
+                marginRight: 8,
               }}
             >
               <div className="absolute left-0 right-0 h-[2px] bg-[#230F2C]/40 z-10" style={{ top: wordHeight + 4 }} />
-              {/* Wheel starts at opacity 0 to match the v=0 fadeEased value
-                  the expand effect computes — keeps the words invisible
-                  until scrolling brings the column halfway open. */}
+              {/* Wheel starts at opacity 0 to match the v=0 wheelOp value the
+                  resolve effect computes — the words are invisible at load and
+                  fade in (pushing up) over the first stretch of the cycle. */}
               <div
                 ref={wheelRef}
                 className="absolute left-0 right-0 flex flex-col items-center transition-none will-change-transform"
@@ -587,6 +593,9 @@ function ServicePanel({
               shorter ones. The period stays a sibling so it lands on the
               same baseline as the cursive script. */}
           <div className="mt-2 text-center sm:text-left">
+            <span className="font-headline text-[2rem] sm:text-5xl md:text-6xl lg:text-[4.5rem] text-white mr-3 sm:mr-4">
+              that inspire
+            </span>
             <span className="relative inline-block font-handwritten text-4xl sm:text-5xl md:text-[70px] text-[#E9C402] leading-none">
               {service.description}
               <span
@@ -614,7 +623,8 @@ function ServicePanel({
 function AboutPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
   const h2Ref = useRef<HTMLHeadingElement>(null);
   const subRef = useRef<HTMLParagraphElement>(null);
-  const ctaRef = useRef<HTMLAnchorElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const [vennReplay, setVennReplay] = useState(0);
 
   useScrollContent(h2Ref, scrollYProgress, snapPoint, sectionSpan, 0);
   useScrollContent(subRef, scrollYProgress, snapPoint, sectionSpan, 1);
@@ -626,31 +636,47 @@ function AboutPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
       style={GRUNGE_BG("#FF733C")}
     >
       <div className="flex flex-col md:flex-row items-center justify-center gap-10 md:gap-16 max-w-6xl">
-        <ValuesVennHero
-          size="large"
-          speed="slow"
-          scrollTrigger={{ scrollYProgress, snapPoint, sectionSpan }}
-        />
-        <div className="text-center md:text-left max-w-xl">
+        <div className="w-full max-w-[660px] shrink-0">
+          <InteractiveVennCanvas
+            chrome={false}
+            replayNonce={vennReplay}
+            scrollTrigger={{ scrollYProgress, snapPoint, sectionSpan }}
+          />
+        </div>
+        <div className="text-center md:text-left max-w-md">
+          <span className="block text-xs uppercase tracking-[0.2em] font-semibold mb-3 text-[#230F2C]/65">
+            About Startle Labs
+          </span>
           <h2
             ref={h2Ref}
-            className="text-4xl md:text-6xl font-headline text-[#230F2C] mb-6 will-change-transform"
+            className="text-3xl md:text-5xl font-headline text-[#230F2C] mb-5 will-change-transform"
           >
-            About Startle Labs
+            Creativity is at the center.
           </h2>
           <p
             ref={subRef}
-            className="text-lg text-[#230F2C]/80 mb-8 will-change-transform"
+            className="text-base text-[#230F2C]/80 mb-8 will-change-transform"
           >
-            We&apos;re a branding and creative agency that believes connection isn&apos;t a skill — it&apos;s a choice.
+            Creativity isn&apos;t a gift, it&apos;s a process. And it&apos;s fortified by three core pillars that keep my work interesting, surprising, and authentic.
           </p>
-          <a
-            ref={ctaRef}
-            href="/about"
-            className="px-8 py-4 bg-[#230F2C] text-white font-medium rounded-full hover:bg-[#230F2C]/80 transition-colors inline-block will-change-transform"
-          >
-            Learn More
-          </a>
+          <div ref={ctaRef} className="flex flex-wrap items-center justify-center md:justify-start gap-3 sm:gap-4 will-change-transform">
+            <a
+              href="/about"
+              className="px-8 py-4 bg-[#230F2C] text-white font-medium rounded-full hover:bg-[#230F2C]/80 transition-colors inline-block"
+            >
+              Learn More
+            </a>
+            <button
+              type="button"
+              onClick={() => setVennReplay((n) => n + 1)}
+              className="inline-flex items-center gap-2 px-6 py-4 rounded-full border border-[#230F2C]/30 text-[#230F2C] font-medium transition-colors hover:border-[#230F2C] hover:bg-[#230F2C]/5"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M3 12a9 9 0 1 0 3-6.7L3 8m0-5v5h5" />
+              </svg>
+              Replay animation
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1129,10 +1155,9 @@ function TopNav({
   const snapForIndex = (idx: number) =>
     idx === 0 ? 0 : heroSpan + (idx - 1) * normalSpan;
 
-  // Hidden over the hero (homepage scroll < 80vh); fades in as the user
-  // moves into the next panel. Mirrors Topbar's pastHero threshold so the
-  // navbar + icon row arrive together. useTransform driven by the same
-  // scrollYProgress so we don't need a second window scroll listener.
+  // Hidden through the hero; the icon row fades in as the hero finishes
+  // resolving and the first service panel slides in. useTransform driven by
+  // the same scrollYProgress so we don't need a second window scroll listener.
   const navOpacity = useTransform(scrollYProgress, [0, heroSpan * 0.7, heroSpan * 0.9, 1], [0, 0, 1, 1]);
 
   return (
@@ -1550,18 +1575,6 @@ function useScrollSnap(
 interface FullscreenScrollerProps {
   services: Service[];
 }
-
-/**
- * Extra scroll VHs allocated to the hero section so that all scroll-wheel words
- * have time to cycle before the first service section slides in.
- */
-const HERO_EXTRA_VH = 2; // word-cycling phase
-/**
- * Resolve/collapse phase that sits between word cycling and the horizontal
- * slide-out. During this window the scroll-word column shrinks and the
- * remaining "Creativity that inspires." headline settles into its final form.
- */
-const HERO_COLLAPSE_VH = 0.6;
 
 export function FullscreenScroller({ services }: FullscreenScrollerProps) {
   const containerRef = useRef<HTMLDivElement>(null);

@@ -21,7 +21,6 @@ const GRUNGE: CSSProperties = {
 // purple ink used sitewide. Same structural role as a service page's
 // `accentColor` — used for hero, manifesto (mid-page accent), CTA.
 const ORANGE = "#E85D28";
-const DARK = "#1d0b35";
 const INK = "#230F2C";
 const PAGE_BG = "#f2f1fa";
 const STATS_BG = "#e7e6f2";
@@ -58,7 +57,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
   return (
     <PageTransition>
       <div style={{ backgroundColor: PAGE_BG, color: INK }}>
-        {/* ─── 1. Hero (ORANGE) ─────────────────────────────── */}
+        {/* ─── 1. Hero (ORANGE) — founder image + intro ─────── */}
         <section
           className="relative pt-32 sm:pt-36 pb-36 sm:pb-44 px-8 sm:px-16 md:px-24 lg:px-32 overflow-hidden"
           style={{ backgroundColor: ORANGE, color: INK, ...GRUNGE }}
@@ -73,16 +72,13 @@ export function AboutTemplate({ data }: { data: AboutData }) {
               <h1 className="font-headline text-5xl md:text-6xl leading-[1.05] tracking-tight mb-6">
                 {data.hero.heading}
               </h1>
-              <p
-                className="text-base sm:text-lg leading-relaxed"
-                style={{ color: `${INK}cc` }}
-              >
+              <p className="text-base sm:text-lg leading-relaxed" style={{ color: `${INK}cc` }}>
                 {data.hero.body}
               </p>
             </motion.div>
 
             <motion.div
-              className="hidden md:flex items-center justify-center w-64 h-64 lg:w-80 lg:h-80 rounded-full flex-shrink-0 overflow-hidden"
+              className="flex items-center justify-center w-56 h-56 sm:w-64 sm:h-64 lg:w-80 lg:h-80 rounded-full flex-shrink-0 overflow-hidden"
               style={{ background: `${INK}18`, boxShadow: `0 0 0 6px ${INK}12` }}
               initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
               animate={{ opacity: 1, scale: 1, rotate: 0 }}

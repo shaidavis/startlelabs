@@ -1,12 +1,23 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+} from "react";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Navigation } from "./Navigation";
 import { SectionNav } from "./SectionNav";
 import { services } from "@/data/services";
+import {
+  HERO_EXTRA_VH,
+  HERO_COLLAPSE_VH,
+  HERO_RESOLVE_PORTION,
+} from "@/components/sections/heroTiming";
 
 /**
  * Single, consistent Topbar across every route.
@@ -25,13 +36,25 @@ export function Topbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const [pastHero, setPastHero] = useState(false);
   const pathname = usePathname();
   const onHomepage = pathname === "/";
   const onServicesPage = pathname?.startsWith("/services/");
   const onAboutPage = pathname === "/about";
   const activeSlug = onServicesPage ? pathname?.split("/")[2] : null;
   const activeService = activeSlug ? services[activeSlug] : null;
+
+  // Scroll-driven logo slide (homepage). The logo translates from centered
+  // (during the word-cycle) to its left rest position over the SAME scroll
+  // window in which the hero's underline collapses — both are pinned to
+  // [HERO_EXTRA_VH, HERO_EXTRA_VH + HERO_COLLAPSE_VH * HERO_RESOLVE_PORTION]
+  // viewport-heights — so the logo and underline slide left as one. The Yalla
+  // + hamburger controls fade in across that window.
+  const logoWrapRef = useRef<HTMLDivElement>(null);
+  const logoX = useMotionValue(0);
+  const controlsOpacity = useMotionValue(onHomepage ? 0 : 1);
+  const controlsPointer = useTransform(controlsOpacity, (o) =>
+    o < 0.05 ? "none" : "auto"
+  );
 
   // On services pages the bar collapses to a thin accent-colored strip
   // while the user is actively scrolling, and re-expands when they stop.
@@ -62,22 +85,53 @@ export function Topbar() {
     };
   }, [onServicesPage, onAboutPage]);
 
-  // Track whether the user has scrolled past the hero (first viewport) on
-  // the homepage. This drives the switch from "logo only, centered" to the
-  // full navbar. Threshold is 80% of vh so the navbar slides in just before
-  // the second panel snaps into place.
-  useEffect(() => {
+  // Drive the logo slide + controls fade from scroll position on the homepage,
+  // locked to the hero's underline-collapse window:
+  //   start = HERO_EXTRA_VH vh                                  (collapse onset)
+  //   end   = HERO_EXTRA_VH + HERO_COLLAPSE_VH * HERO_RESOLVE_PORTION vh
+  // since one scroller unit == one viewport-height of scroll. Off-homepage the
+  // logo rests at its left position with the controls shown. useLayoutEffect so
+  // the centered start frame is committed before paint (no left-then-center
+  // flash on load).
+  useLayoutEffect(() => {
     if (!onHomepage) {
-      setPastHero(true);
+      logoX.set(0);
+      controlsOpacity.set(1);
       return;
     }
-    setPastHero(window.scrollY >= window.innerHeight * 0.8);
-    const handleScroll = () => {
-      setPastHero(window.scrollY >= window.innerHeight * 0.8);
+    const apply = () => {
+      const el = logoWrapRef.current;
+      const winH = window.innerHeight;
+      if (!el || !winH) return;
+      // Offset that centers the logo over the viewport from its left rest
+      // position. offsetLeft/offsetWidth are layout-based, so this stays
+      // correct regardless of the logo's current translate.
+      const restCenter = el.offsetLeft + el.offsetWidth / 2;
+      const centerOffset = window.innerWidth / 2 - restCenter;
+      const startPx = winH * HERO_EXTRA_VH;
+      const endPx =
+        winH * (HERO_EXTRA_VH + HERO_COLLAPSE_VH * HERO_RESOLVE_PORTION);
+      const p = Math.max(
+        0,
+        Math.min(1, (window.scrollY - startPx) / (endPx - startPx))
+      );
+      // Same smoothstep easing the underline uses for its width, so the logo
+      // and the line travel left frame-for-frame, not just sharing endpoints.
+      const eased = p * p * (3 - 2 * p);
+      // p=0 (through the whole cycle): centered. p=1 (collapse done): left rest.
+      logoX.set(centerOffset * (1 - eased));
+      // Controls fade in over the back half of the slide so they arrive as the
+      // logo settles rather than competing with it mid-slide.
+      controlsOpacity.set(Math.max(0, Math.min(1, (p - 0.4) / 0.6)));
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [onHomepage]);
+    apply();
+    window.addEventListener("scroll", apply, { passive: true });
+    window.addEventListener("resize", apply);
+    return () => {
+      window.removeEventListener("scroll", apply);
+      window.removeEventListener("resize", apply);
+    };
+  }, [onHomepage, logoX, controlsOpacity]);
 
   // Logo always returns to the very start of the site — the yellow hero
   // panel at scroll 0. Previously it deep-linked to the matching service
@@ -170,16 +224,28 @@ export function Topbar() {
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => setHovered(false)}
       >
-        {/* Logo markup shared between hero and full modes so layoutId can
-            animate it from centered → left when the user scrolls in. */}
+        {/* Single content layout. On the homepage the logo translates from
+            centered (during the word-cycle) to its left rest position over the
+            underline's collapse window via `logoX`, and the Yalla + hamburger
+            controls fade in via `controlsOpacity`. Off-homepage the logo rests
+            left with the controls shown. */}
         {(() => {
           const logoContent = (
             <>
-              <img
-                src="/images/logos/SL%20logo%20grunge%20-dark%20black.png"
+              <span
                 aria-hidden
-                alt=""
-                className="block h-7 sm:h-8 w-7 sm:w-8 shrink-0 object-contain origin-bottom-left transition-[transform,filter] duration-150 ease-out group-hover:scale-[1.15] group-hover:-rotate-12 group-hover:[filter:drop-shadow(0_0_8px_rgba(239,206,37,0.7))]"
+                className="block h-7 sm:h-8 w-7 sm:w-8 shrink-0 origin-bottom-left transition-[transform,filter] duration-150 ease-out group-hover:scale-[1.15] group-hover:-rotate-12 group-hover:[filter:drop-shadow(0_0_8px_rgba(239,206,37,0.7))]"
+                style={{
+                  backgroundColor: "#230F2C",
+                  WebkitMaskImage: "url(/images/accents/bolt-3.png)",
+                  maskImage: "url(/images/accents/bolt-3.png)",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  maskPosition: "center",
+                  WebkitMaskSize: "contain",
+                  maskSize: "contain",
+                }}
               />
               <span
                 className="font-headline text-xl sm:text-2xl leading-none"
@@ -190,121 +256,137 @@ export function Topbar() {
             </>
           );
 
-          const showHeroLogo = onHomepage && !pastHero;
-
           return (
-            <AnimatePresence mode="wait">
-              {showHeroLogo ? (
-                /* ── Hero mode: logo centered, nothing else ── */
-                <motion.div
-                  key="hero"
-                  className={`w-full h-full flex items-center justify-center ${collapsed ? "pointer-events-none" : ""}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: collapsed ? 0 : 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
+            <motion.div
+              className={`w-full h-full flex items-center justify-between px-8 sm:px-10 md:px-12 ${collapsed ? "pointer-events-none" : ""}`}
+              animate={{ opacity: collapsed ? 0 : 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              <motion.div
+                ref={logoWrapRef}
+                style={{ x: logoX }}
+                className="shrink-0"
+              >
+                <Link
+                  href={homeHref}
+                  onClick={handleLogoClick}
+                  onMouseEnter={
+                    onServicesPage || onAboutPage
+                      ? undefined
+                      : () =>
+                          window.dispatchEvent(
+                            new CustomEvent("lightning:strike")
+                          )
+                  }
+                  className="group flex items-center gap-0 shrink-0"
                 >
-                  <motion.div layoutId="topbar-logo">
-                    <Link
-                      href={homeHref}
-                      onClick={handleLogoClick}
-                      onMouseEnter={() =>
-                        window.dispatchEvent(new CustomEvent("lightning:strike"))
-                      }
-                      className="group flex items-center gap-0 shrink-0"
-                    >
-                      {logoContent}
-                    </Link>
-                  </motion.div>
-                </motion.div>
+                  {logoContent}
+                </Link>
+              </motion.div>
+
+              {onHomepage ? (
+                <div className="flex-1" />
               ) : (
-                /* ── Full navbar mode ── */
-                <motion.div
-                  key="full"
-                  className={`w-full h-full flex items-center justify-between px-8 sm:px-10 md:px-12 ${collapsed ? "pointer-events-none" : ""}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: collapsed ? 0 : 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <motion.div layoutId="topbar-logo">
-                    <Link
-                      href={homeHref}
-                      onClick={handleLogoClick}
-                      onMouseEnter={
-                        onServicesPage || onAboutPage
-                          ? undefined
-                          : () =>
-                              window.dispatchEvent(
-                                new CustomEvent("lightning:strike")
-                              )
-                      }
-                      className="group flex items-center gap-0 shrink-0"
-                    >
-                      {logoContent}
-                    </Link>
-                  </motion.div>
-
-                  {onHomepage ? (
-                    <div className="flex-1" />
-                  ) : (
-                    <div className="hidden md:flex flex-1 items-center justify-center px-6">
-                      <SectionNav activeId={activeSectionId} tone="dark" />
-                    </div>
-                  )}
-
-                  <div className="flex items-center gap-5 shrink-0">
-                    <Link
-                      href="/#contact"
-                      scroll={false}
-                      onClick={handleYallaClick}
-                      className="relative group hidden sm:inline-flex items-center px-2 py-1 text-[#230F2C]"
-                    >
-                      <span
-                        aria-hidden
-                        className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[160px] h-[100px] sm:w-[200px] sm:h-[125px] transition-opacity duration-200 ease-out ${
-                          pathname === "/contact"
-                            ? "opacity-100"
-                            : "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
-                        }`}
-                        style={{
-                          backgroundColor: "#ffffff",
-                          WebkitMaskImage: "url(/images/accents/burst.png)",
-                          maskImage: "url(/images/accents/burst.png)",
-                          WebkitMaskSize: "contain",
-                          maskSize: "contain",
-                          WebkitMaskRepeat: "no-repeat",
-                          maskRepeat: "no-repeat",
-                          WebkitMaskPosition: "center",
-                          maskPosition: "center",
-                        }}
-                      />
-                      <span className="relative z-10 font-handwritten text-2xl sm:text-3xl leading-none -translate-x-1 transition-transform duration-200 ease-out group-hover:-rotate-[6deg] group-focus-visible:-rotate-[6deg]">
-                        Yalla!
-                      </span>
-                    </Link>
-
-                    <button
-                      onClick={() => setMenuOpen(true)}
-                      className="relative z-50 flex flex-col items-center justify-center w-10 h-10 gap-[5px]"
-                      aria-label="Open menu"
-                      aria-expanded={menuOpen}
-                    >
-                      <span
-                        className="block w-5 h-[1.5px] transition-transform"
-                        style={{ backgroundColor: "#230F2C" }}
-                      />
-                      <span
-                        className="block w-5 h-[1.5px] transition-transform"
-                        style={{ backgroundColor: "#230F2C" }}
-                      />
-                    </button>
-                  </div>
-                </motion.div>
+                <div className="hidden md:flex flex-1 items-center justify-center px-6">
+                  <SectionNav activeId={activeSectionId} tone="dark" />
+                </div>
               )}
-            </AnimatePresence>
+
+              <motion.div
+                className="flex items-center gap-5 shrink-0"
+                style={{ opacity: controlsOpacity, pointerEvents: controlsPointer }}
+              >
+                <Link
+                  href="/#contact"
+                  scroll={false}
+                  onClick={handleYallaClick}
+                  className="relative group hidden sm:inline-flex items-center px-4 sm:px-5 py-1.5 text-[#230F2C]"
+                >
+                  {/* Hand-drawn pill border — the CTA's resting state. The
+                      stadium path is intentionally a little wobbly/overshot so
+                      it reads as sketched; `vectorEffect=non-scaling-stroke`
+                      keeps the ink an even weight however the box stretches.
+                      Fades out on hover (and on /contact, where the burst is
+                      pinned on) so the explosion has the stage to itself. */}
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 200 64"
+                    preserveAspectRatio="none"
+                    fill="none"
+                    className={`pointer-events-none absolute inset-0 h-full w-full overflow-visible transition-opacity duration-200 ease-out ${
+                      pathname === "/contact"
+                        ? "opacity-0"
+                        : "opacity-100 group-hover:opacity-0 group-focus-visible:opacity-0"
+                    }`}
+                  >
+                    <path
+                      d="M42 7 C 86 3.6 132 4.4 168 7.6 C 189 9.6 197.5 19 196.6 32 C 195.8 45 188 55 167 57.6 C 130 60.6 80 59.4 37 57.4 C 15 56 3.4 45 4.6 31.5 C 5.6 18 15.5 8.4 46 6.6"
+                      stroke="#230F2C"
+                      strokeWidth={2.4}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </svg>
+
+                  <span
+                    aria-hidden
+                    className={`pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[160px] h-[100px] sm:w-[200px] sm:h-[125px] transition-opacity duration-200 ease-out ${
+                      pathname === "/contact"
+                        ? "opacity-100"
+                        : "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+                    }`}
+                    style={{
+                      backgroundColor: "#ffffff",
+                      WebkitMaskImage: "url(/images/accents/burst.png)",
+                      maskImage: "url(/images/accents/burst.png)",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                      WebkitMaskRepeat: "no-repeat",
+                      maskRepeat: "no-repeat",
+                      WebkitMaskPosition: "center",
+                      maskPosition: "center",
+                    }}
+                  />
+                  <span className="relative z-10 font-handwritten text-2xl sm:text-3xl leading-none transition-transform duration-200 ease-out group-hover:-rotate-[6deg] group-focus-visible:-rotate-[6deg]">
+                    Yalla!
+                  </span>
+                </Link>
+
+                <button
+                  onClick={() => setMenuOpen(true)}
+                  className="relative z-50 flex flex-col items-center justify-center w-10 h-10 gap-[5px]"
+                  aria-label="Open menu"
+                  aria-expanded={menuOpen}
+                >
+                  <span
+                    className="block w-5 h-[1.5px] transition-transform"
+                    style={{ backgroundColor: "#230F2C" }}
+                  />
+                  <span
+                    className="block w-5 h-[1.5px] transition-transform"
+                    style={{ backgroundColor: "#230F2C" }}
+                  />
+                </button>
+              </motion.div>
+            </motion.div>
           );
         })()}
+
+        {/* Torn bottom edge — a few subtle angles so the bar tears into the
+            page rather than meeting it at a flat line. Stays attached to the
+            bar's bottom (top-full) so it follows the collapse animation. */}
+        {barBg && (
+          <svg
+            aria-hidden
+            className="pointer-events-none absolute left-0 right-0 top-full w-full"
+            style={{ height: 7 }}
+            viewBox="0 0 1440 7"
+            preserveAspectRatio="none"
+          >
+            <path d="M0,0 L1440,0 L1440,3 L1040,7 L660,2 L300,7 L0,4 Z" fill={barBg} />
+          </svg>
+        )}
       </motion.header>
 
       <Navigation isOpen={menuOpen} onClose={() => setMenuOpen(false)} />

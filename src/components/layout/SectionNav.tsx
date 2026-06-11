@@ -432,7 +432,7 @@ function NavIconLink({
         initial={false}
         animate={{
           scale: isActive ? 1.4 : 1,
-          opacity: isActive ? 1 : 0.55,
+          opacity: isActive ? 1 : 0.78,
           color: isActive ? activeColor : restingColor,
         }}
         whileHover={{ scale: 1.5, opacity: 1, color: activeColor }}

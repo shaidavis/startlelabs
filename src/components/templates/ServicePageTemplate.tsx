@@ -297,6 +297,9 @@ function CountingValue({ value }: { value: string }) {
 
 export function ServicePageTemplate({ service }: Props) {
   const accent = service.accentColor;
+  // Hero figure: prefer the Figma-exported reversed art, else fall back to the
+  // service's main illustration so every hero shows an image.
+  const heroArt = service.ctaArt ?? service.heroImage;
   const related = service.relatedServices
     .map((slug) => services[slug])
     .filter(Boolean);
@@ -337,16 +340,16 @@ export function ServicePageTemplate({ service }: Props) {
             aria-hidden
             className="absolute inset-0 w-full h-full"
           />
-          {service.ctaArt && (
+          {heroArt && (
             // Wrapper sized narrower than the splash so the figure reads as
             // sitting "inside" the yellow. Bottom reaches the splash's
             // bottom so the stats polygon (overlapping via negative margin)
             // crops the figure's feet visually — the next section "stands
             // on top of" him. Since the splash is aspect-locked, these
             // percentages now resolve to the same look at every width.
-            <div className="absolute top-[2%] bottom-0 right-[2%] w-[72%]">
+            <div className="absolute top-[6%] bottom-0 right-[2%] w-[72%]">
               <img
-                src={service.ctaArt}
+                src={heroArt}
                 alt=""
                 aria-hidden
                 className="w-full h-full object-contain object-bottom"
@@ -367,9 +370,26 @@ export function ServicePageTemplate({ service }: Props) {
           animate="visible"
           variants={rise}
         >
+          <motion.div custom={0} variants={rise}>
+            <Link
+              href={`/#${service.slug}`}
+              className="group mb-4 inline-flex items-center gap-1.5 text-sm font-medium opacity-70 transition-opacity hover:opacity-100"
+            >
+              <svg
+                width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+                aria-hidden
+                className="transition-transform duration-150 ease-out group-hover:-translate-x-1"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Back to overview
+            </Link>
+          </motion.div>
+
           <motion.h1
             className="text-4xl sm:text-5xl md:text-[44px] font-headline leading-[1.05] tracking-tight"
-            custom={0}
+            custom={1}
             variants={rise}
           >
             {service.heroTagline}
@@ -378,7 +398,7 @@ export function ServicePageTemplate({ service }: Props) {
           {/* Body split into 2 short paragraphs — matches Figma rhythm */}
           <motion.div
             className="mt-6 space-y-5 text-sm sm:text-base leading-relaxed opacity-85"
-            custom={1}
+            custom={2}
             variants={rise}
           >
             {splitIntoParagraphs(service.heroIntro).map((para, i) => (
