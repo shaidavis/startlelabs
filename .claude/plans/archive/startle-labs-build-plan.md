@@ -1,3 +1,8 @@
+> **HISTORICAL — superseded by `docs/ARCHITECTURE.md`.** This plan targets "Next.js 15" and
+> documents routes/components that were later removed or never built (`/work` case studies,
+> `CaseStudyTemplate`, `team.ts`, `tailwind.config.ts`). Kept for intent/history only —
+> do not treat as current architecture.
+
 # Startle Labs Website — Build Plan
 
 ## Context
