@@ -98,8 +98,13 @@ export function RadiatingBolts({
         // collapsed at crown). On hover they animate to these targets so
         // the bolt's inner end flies outward to the ring radius.
         const angleRad = (b.angle * Math.PI) / 180;
-        const targetROx = innerRadius * scale * Math.cos(angleRad);
-        const targetROy = innerRadius * scale * Math.sin(angleRad);
+        // Rounded to 2dp: Node and browser JS engines disagree on the last
+        // ulp of Math.sin/cos, which made the SSR'd style attribute differ
+        // from the client render and threw hydration-mismatch errors.
+        const targetROx =
+          Math.round(innerRadius * scale * Math.cos(angleRad) * 100) / 100;
+        const targetROy =
+          Math.round(innerRadius * scale * Math.sin(angleRad) * 100) / 100;
 
         // 0×0 reference point at the crown anchor.
         const anchorStyle: CSSProperties = {
@@ -121,11 +126,11 @@ export function RadiatingBolts({
         // whole bolt outward along its radial direction.
         const boltStyle: CSSProperties & Record<string, string> = {
           position: "absolute",
-          right: 0,
-          top: 0,
+          right: "0",
+          top: "0",
           transformOrigin: "100% 50%",
           transform: `translate(var(--rox), var(--roy)) translateY(-50%) rotate(${b.angle + 180}deg) scale(var(--bs))`,
-          opacity: "var(--bo)" as unknown as number,
+          opacity: "var(--bo)",
           transitionDelay: `${b.delay}ms`,
           ["--rox-target" as string]: `${targetROx}px`,
           ["--roy-target" as string]: `${targetROy}px`,

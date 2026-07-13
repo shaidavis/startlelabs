@@ -21,6 +21,11 @@ const GRUNGE: CSSProperties = {
 // purple ink used sitewide. Same structural role as a service page's
 // `accentColor` — used for hero, manifesto (mid-page accent), CTA.
 const ORANGE = "#E85D28";
+// Darker orange for SMALL text on the light surfaces (eyebrows, chips) —
+// raw ORANGE only reaches ~3.1:1 on lavender, below WCAG AA's 4.5:1.
+// Large display text (30px+ numerals, FAQ glyphs) stays on ORANGE, which
+// clears the 3:1 large-text/graphics minimum.
+const ORANGE_TEXT = "#BA4A20";
 const INK = "#230F2C";
 const PAGE_BG = "#f2f1fa";
 const STATS_BG = "#e7e6f2";
@@ -116,7 +121,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
           <div className="relative z-10 max-w-6xl mx-auto px-8 sm:px-16 md:px-24 lg:px-32 mb-12 text-center">
             <div
               className="text-xs uppercase tracking-[0.18em] font-semibold mb-3"
-              style={{ color: ORANGE }}
+              style={{ color: ORANGE_TEXT }}
             >
               What clients say
             </div>
@@ -201,7 +206,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
             <div className="mb-14 max-w-2xl">
               <div
                 className="text-xs uppercase tracking-[0.18em] font-semibold mb-3"
-                style={{ color: ORANGE }}
+                style={{ color: ORANGE_TEXT }}
               >
                 How we work
               </div>
@@ -306,7 +311,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
             <div className="mb-10 max-w-2xl">
               <div
                 className="text-xs uppercase tracking-[0.18em] font-semibold mb-3"
-                style={{ color: ORANGE }}
+                style={{ color: ORANGE_TEXT }}
               >
                 Portfolio
               </div>
@@ -352,7 +357,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
             <div className="mb-10">
               <div
                 className="text-xs uppercase tracking-[0.18em] font-semibold mb-3"
-                style={{ color: ORANGE }}
+                style={{ color: ORANGE_TEXT }}
               >
                 FAQs
               </div>
@@ -372,6 +377,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
                       className="w-full flex items-center justify-between px-6 py-5 text-left"
                       onClick={() => setOpenFaq(isOpen ? null : i)}
                       aria-expanded={isOpen}
+                      aria-controls={`faq-answer-${i}`}
                     >
                       <span className="font-medium pr-4">{faq.question}</span>
                       <span
@@ -390,6 +396,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
                       {isOpen && (
                         <motion.div
                           key="answer"
+                          id={`faq-answer-${i}`}
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
@@ -491,7 +498,7 @@ function TestimonialCard({ review }: { review: Review }) {
       </p>
       <span
         className="inline-block text-[10px] uppercase tracking-[0.18em] font-semibold px-2.5 py-1 rounded-full"
-        style={{ background: `${ORANGE}1a`, color: ORANGE }}
+        style={{ background: `${ORANGE}1a`, color: ORANGE_TEXT }}
       >
         {review.category}
       </span>

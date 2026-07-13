@@ -63,6 +63,12 @@ export interface Service {
   heroImage: string;
   /** Theme color used across the detail page */
   accentColor: string;
+  /**
+   * Darker companion to `accentColor` for TEXT on light surfaces (lavender
+   * #f2f1fa, cream #f7f5ee, white). Same hue, darkened just enough to meet
+   * WCAG AA 4.5:1 for small text — the raw accents only reach 2.6–3.9:1.
+   */
+  accentText: string;
   /** Background color for the deliverables grid section. Defaults to the shared DARK value in the template. */
   deliverablesBg?: string;
   /** Longer-form intro paragraph shown below the hero headline */
@@ -107,9 +113,12 @@ export const services: Record<string, Service> = {
     headline: "Creative strategy,\nbrand identity,\nand messaging",
     description: "confidence",
     navTitle: "Creative strategy, Brand identity, and Messaging",
-    heroTagline: "Creative Solutions",
+    heroTagline: "Branding & Creative Strategy",
     heroImage: "/images/icons/branding.png",
-    accentColor: "#05AB8A",
+    // #05A787 (vs. the original #05AB8A) is darkened ~2% so white headline
+    // text on this background clears WCAG AA's 3:1 large-text minimum.
+    accentColor: "#05A787",
+    accentText: "#047D65",
     deliverablesBg: "#203C2B",
     heroIntro:
       "Your brand is the face of your business. It needs to exude confidence, setting the tone for how your market perceives you. Just like wearing your best outfit, your brand should make you feel unstoppable, ready to engage with customers and stand out from competitors. When your brand looks and feels right, you walk into any room (or market) with swagger.",
@@ -193,6 +202,7 @@ export const services: Record<string, Service> = {
     heroTagline: "Pitch perfect.",
     heroImage: "/images/icons/presentations.png",
     accentColor: "#137FBF",
+    accentText: "#1174AE",
     heroIntro:
       "Your pitch deck isn't just about presenting facts—it's about sparking curiosity. You need to make your investors or audience lean in, asking for more. When your message is compelling and thought-provoking, it ignites curiosity, pushing them to want to explore your vision and become part of your journey. It's not just what you show; it's what they want to learn next.",
     stats: [
@@ -276,6 +286,7 @@ export const services: Record<string, Service> = {
     heroTagline: "Web perfect.",
     heroImage: "/images/icons/artdirection.png",
     accentColor: "#F84267",
+    accentText: "#C83553",
     deliverablesBg: "#6A0000",
     heroIntro:
       "Your website is where your brand builds meaningful connections. It's more than just a digital presence—it's a space where your audience should feel immediately at home. When done right, your website creates a lasting bond, making visitors feel like they've found what they've been looking for, fostering engagement, loyalty, and trust.",

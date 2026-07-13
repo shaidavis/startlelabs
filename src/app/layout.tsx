@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Averia_Gruesa_Libre, DM_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import { Topbar } from "@/components/layout/Topbar";
+import { MotionProvider } from "@/components/layout/MotionProvider";
 import { LightningEffect } from "@/components/effects/LightningEffect";
 
 import { Footer } from "@/components/layout/Footer";
@@ -52,10 +53,12 @@ export default function RootLayout({
         <a href="#main-content" className="skip-link">
           Skip to content
         </a>
-        <Topbar />
-        <main id="main-content">{children}</main>
-        <Footer />
-        <LightningEffect />
+        <MotionProvider>
+          <Topbar />
+          <main id="main-content">{children}</main>
+          <Footer />
+          <LightningEffect />
+        </MotionProvider>
 
         {/* Google Analytics — replace GA_MEASUREMENT_ID with actual ID */}
         {process.env.NEXT_PUBLIC_GA_ID && (

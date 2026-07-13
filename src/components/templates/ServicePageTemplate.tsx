@@ -89,6 +89,11 @@ const YELLOW = "#efce25";
 /* Cross-sell banner art — one pair (idle / hover) per service slug.
    Loaded as <img> tags rather than CSS bg so we can swap them with a
    simple group-hover opacity crossfade. */
+// Cache-busting version for the banner PNGs. These live in /public (not
+// content-hashed), so a browser/CDN can otherwise serve a stale copy. The
+// PNGs were re-exported to strip a baked-in gray torn-paper mat; bump this
+// whenever the banner art changes so every client refetches.
+const BANNER_V = "?v=2";
 const CROSS_SELL_BANNERS: Record<string, { idle: string; hover: string }> = {
   "brand-strategy": {
     idle: "/images/banners/Branding%20Idle.png",
@@ -300,6 +305,9 @@ export function ServicePageTemplate({ service }: Props) {
   // Hero figure: prefer the Figma-exported reversed art, else fall back to the
   // service's main illustration so every hero shows an image.
   const heroArt = service.ctaArt ?? service.heroImage;
+  // Darker accent for small text / thin glyphs on the light surfaces —
+  // the raw accent colors fall short of WCAG AA 4.5:1 there.
+  const accentText = service.accentText;
   const related = service.relatedServices
     .map((slug) => services[slug])
     .filter(Boolean);
@@ -435,7 +443,7 @@ export function ServicePageTemplate({ service }: Props) {
             viewBoxHeight={FIGMA_TORN.statsTop.viewBoxHeight}
             grunge
           />
-          <div className="relative z-10 max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+          <div className="relative z-10 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
             {service.stats.map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -447,7 +455,7 @@ export function ServicePageTemplate({ service }: Props) {
               >
                 <div
                   className="text-xs sm:text-sm uppercase tracking-[0.18em] font-semibold mb-3"
-                  style={{ color: accent }}
+                  style={{ color: accentText }}
                 >
                   {stat.label}
                 </div>
@@ -766,21 +774,39 @@ export function ServicePageTemplate({ service }: Props) {
                   key={r.slug}
                   href={`/services/${r.slug}`}
                   className="group relative block overflow-hidden transition-transform hover:-translate-y-1"
+                  // The banner PNGs originally shipped with a light-gray
+                  // torn-paper "mat" baked around the illustration, which read
+                  // as a stray gray border on the lavender page. The mat has
+                  // since been flood-filled out of the source PNGs (everything
+                  // outside the torn red edge is now transparent), so no clip
+                  // is needed — the illustration's own torn edge is the border.
                   aria-label={`${r.title} — ${r.cta.text}`}
                 >
                   {/* Idle banner art — fades out on hover. */}
                   <img
-                    src={banner.idle}
+                    src={banner.idle + BANNER_V}
                     alt=""
                     aria-hidden
                     className="block w-full h-auto select-none pointer-events-none transition-opacity duration-200 group-hover:opacity-0"
                   />
                   {/* Hover banner art — pinned to the same box, fades in. */}
                   <img
-                    src={banner.hover}
+                    src={banner.hover + BANNER_V}
                     alt=""
                     aria-hidden
                     className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                  />
+                  {/* Soft ink scrim behind the text zone — the white title
+                      alone reaches only ~3.5:1 on the flat accent areas of
+                      the banner art; this gradient lifts it past WCAG AA's
+                      4.5:1 while reading as gentle illustration shading. */}
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-y-0 right-0 w-[60%]"
+                    style={{
+                      background:
+                        "linear-gradient(to left, rgba(35,15,44,0.32) 55%, rgba(35,15,44,0))",
+                    }}
                   />
                   {/* Text + squiggle arrow overlay, anchored to the right
                       half of the banner where the figure leaves whitespace. */}

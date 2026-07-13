@@ -5,6 +5,7 @@ import {
   motion,
   useScroll,
   useTransform,
+  useMotionValueEvent,
   type MotionValue,
 } from "framer-motion";
 import type { Service } from "@/data/services";
@@ -537,9 +538,7 @@ function ServicePanel({
       {/* All service panels need visible overflow so the radiating-bolt
           halo can extend past the image bbox — each bolt flies out
           ~140 + 230 = 370px from its anchor (crown / eye / heart). */}
-      <div className={`absolute inset-x-0 sm:inset-x-auto sm:right-0 flex justify-center sm:justify-end pointer-events-none overflow-visible sm:bottom-0 ${
-        service.slug === "digital-design" ? "bottom-0" : "bottom-[6%]"
-      }`}>
+      <div className="absolute inset-x-0 sm:inset-x-auto sm:right-0 bottom-0 flex justify-center sm:justify-end pointer-events-none overflow-visible">
         {/* `group` + `relative` lets the bolt overlay sit on top of the
             img and react to hover. The img wrapper inline-blocks to its
             natural rendered size so the bolts' percentage origin aligns
@@ -592,7 +591,7 @@ function ServicePanel({
               ending up too short on words like "connection" or too long on
               shorter ones. The period stays a sibling so it lands on the
               same baseline as the cursive script. */}
-          <div className="mt-2 text-center sm:text-left">
+          <div className="mt-1 leading-[1.1] text-center sm:text-left">
             <span className="font-headline text-[2rem] sm:text-5xl md:text-6xl lg:text-[4.5rem] text-white mr-3 sm:mr-4">
               that inspire
             </span>
@@ -691,18 +690,44 @@ function AboutPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
  * tight to one breath — the panel is 100vh and the scrollable detail page
  * is right there for anyone who clicks through.
  */
+// Traffic-light availability board for the contact panel. Edit freely —
+// `status` picks the light color + handwritten status word below.
+const AVAILABILITY: { label: string; status: keyof typeof AVAILABILITY_STATUS }[] = [
+  { label: "A limonana", status: "green" },
+  { label: "Collaborations", status: "green" },
+  { label: "Client work", status: "yellow" },
+];
+const AVAILABILITY_STATUS = {
+  green: { color: "#05A787", word: "always" },
+  yellow: { color: "#E85D28", word: "ask me" },
+  red: { color: "#D2304C", word: "not right now" },
+} as const;
+
+// 8 bolts evenly spaced — matches the heart treatment in Footer/Navigation.
+const FOOTER_HEART_BOLTS = (() => {
+  const count = 8;
+  const out = [];
+  for (let i = 0; i < count; i++) {
+    const angle = -90 + (i * 360) / count;
+    out.push({ shape: "zigzag-1" as const, angle, size: 230, delay: i * 55 });
+  }
+  return out;
+})();
+
 function ContactPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
   const eyebrowRef = useRef<HTMLParagraphElement>(null);
   const h2Ref = useRef<HTMLHeadingElement>(null);
   const subRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLAnchorElement>(null);
+  const matrixRef = useRef<HTMLDivElement>(null);
   const footerRowRef = useRef<HTMLDivElement>(null);
 
   useScrollContent(eyebrowRef, scrollYProgress, snapPoint, sectionSpan, 0);
   useScrollContent(h2Ref, scrollYProgress, snapPoint, sectionSpan, 1);
   useScrollContent(subRef, scrollYProgress, snapPoint, sectionSpan, 2);
   useScrollContent(ctaRef, scrollYProgress, snapPoint, sectionSpan, 3);
-  useScrollContent(footerRowRef, scrollYProgress, snapPoint, sectionSpan, 4);
+  useScrollContent(matrixRef, scrollYProgress, snapPoint, sectionSpan, 4);
+  useScrollContent(footerRowRef, scrollYProgress, snapPoint, sectionSpan, 5);
 
   return (
     <div
@@ -734,9 +759,12 @@ function ContactPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
             Tell us what you&apos;re working on. We answer fast — usually same
             day, always before you start regretting sending it.
           </p>
+          {/* mailto, not /contact: that route 307s back to this very panel
+              (/#contact), so a button labelled with an email address would
+              just reload the view the user is already on. */}
           <a
             ref={ctaRef}
-            href="/contact"
+            href="mailto:hello@startlelabs.com"
             className="inline-flex items-center gap-3 px-7 sm:px-9 py-4 sm:py-5 rounded-full font-semibold text-base sm:text-lg bg-[#230F2C] text-[#E9C402] hover:translate-y-[-1px] transition-transform will-change-transform"
           >
             hello@startlelabs.com
@@ -755,38 +783,107 @@ function ContactPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
               <path d="M7 3l4 4-4 4" />
             </svg>
           </a>
+
+          {/* Availability matrix — status lights for what's on the menu
+              right now. Color is never the only signal: each light pairs
+              with a handwritten status word, and the dots carry an ink ring
+              so they read against the yellow. Tweak the entries/statuses in
+              AVAILABILITY below. */}
+          <div ref={matrixRef} className="mt-10 will-change-transform">
+            <p className="text-xs uppercase tracking-[0.3em] font-semibold mb-4 text-[#230F2C]/70">
+              Am available for:
+            </p>
+            <ul className="space-y-2.5">
+              {AVAILABILITY.map((item) => {
+                const meta = AVAILABILITY_STATUS[item.status];
+                return (
+                  <li
+                    key={item.label}
+                    className="flex items-center gap-3 text-base sm:text-lg text-[#230F2C]"
+                  >
+                    <span
+                      aria-hidden
+                      className="block w-3 h-3 rounded-full shrink-0 ring-1 ring-[#230F2C]/35"
+                      style={{ backgroundColor: meta.color }}
+                    />
+                    <span className="font-medium">{item.label}</span>
+                    <span className="font-handwritten text-xl leading-none text-[#230F2C]/60">
+                      {meta.word}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
       </div>
 
       {/* In-panel footer row — replaces the global Footer on the homepage so
           the scroller terminates cleanly without a separate footer screen.
-          Same content the dark Footer had: copyright + social links. */}
-      <div
-        ref={footerRowRef}
-        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-6 pt-6 border-t border-[#230F2C]/15 will-change-transform"
-      >
-        <span className="text-xs uppercase tracking-[0.2em] font-semibold text-[#230F2C]/60">
-          © {new Date().getFullYear()} Startle Labs
-        </span>
-        <div className="flex gap-6 sm:gap-8 text-xs uppercase tracking-[0.2em] font-semibold text-[#230F2C]">
-          <a
-            href="https://twitter.com/startlelabs"
-            className="hover:opacity-60 transition-opacity"
-          >
-            Twitter
-          </a>
-          <a
-            href="https://www.instagram.com/startle.labs"
-            className="hover:opacity-60 transition-opacity"
-          >
-            Instagram
-          </a>
-          <a
-            href="https://linkedin.com/in/shaidavis"
-            className="hover:opacity-60 transition-opacity"
-          >
-            LinkedIn
-          </a>
+          Mirrors the menu screen footer: logo | hand-drawn with ♥ in TLV |
+          LinkedIn, copyright centered below — in ink on the panel yellow. */}
+      <div ref={footerRowRef} className="will-change-transform pt-6 border-t border-[#230F2C]/15">
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
+          <div className="hidden sm:flex items-baseline gap-3 sm:flex-1">
+            <span
+              aria-hidden
+              className="block h-7 w-7 shrink-0"
+              style={{
+                backgroundColor: "#230F2C",
+                WebkitMaskImage: "url(/images/accents/bolt-3.png)",
+                maskImage: "url(/images/accents/bolt-3.png)",
+                WebkitMaskRepeat: "no-repeat",
+                maskRepeat: "no-repeat",
+                WebkitMaskPosition: "center",
+                maskPosition: "center",
+                WebkitMaskSize: "contain",
+                maskSize: "contain",
+              }}
+            />
+            <span className="font-headline text-2xl leading-none text-[#230F2C]">
+              Startle Labs
+            </span>
+          </div>
+          {/* div, not <p>: RadiatingBolts renders <div>s, which are invalid
+              inside a paragraph and caused React hydration errors. */}
+          <div className="font-handwritten text-xl flex items-center gap-2 text-[#230F2C]">
+            Hand-drawn with
+            <span className="relative group inline-block" style={{ width: 24, height: 24 }}>
+              <img
+                src="/images/icons/Heart .png"
+                alt="love"
+                width={24}
+                height={24}
+                className="inline-block"
+              />
+              <RadiatingBolts color="white" scale={0.12} bolts={FOOTER_HEART_BOLTS} />
+            </span>
+            in TLV
+          </div>
+          <div className="sm:flex-1 flex sm:justify-end">
+            <a
+              href="https://linkedin.com/in/shaidavis"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 py-3 -my-3 text-sm uppercase tracking-[0.2em] font-semibold text-[#230F2C] hover:opacity-70 transition-opacity"
+            >
+              LinkedIn
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="h-4 w-4"
+                aria-hidden
+              >
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+              </svg>
+            </a>
+          </div>
+        </div>
+        <div className="mt-3 text-center">
+          <span className="text-xs uppercase tracking-[0.2em] font-semibold text-[#230F2C]/60">
+            © {new Date().getFullYear()} Startle Labs
+          </span>
         </div>
       </div>
     </div>
@@ -894,10 +991,32 @@ function ScrollPanel({
 
   const panelProps = { scrollYProgress, snapPoint, sectionSpan };
 
+  // All panels stay mounted at all times (the strip slides horizontally),
+  // so off-screen panels are merely transparent — without `inert`, keyboard
+  // users would Tab into invisible links and screen readers would read all
+  // six panels at once. A panel counts as on-screen while the scroll
+  // position is within half a section span of its snap point (the hero owns
+  // everything up to its slide-out).
+  const isNear = useCallback(
+    (v: number) => {
+      const slideStart = heroSpan - normalSpan;
+      if (section.index === 0) return v < slideStart + normalSpan * 0.5;
+      return Math.abs(v - snapPoint) < normalSpan * 0.5;
+    },
+    [section.index, snapPoint, heroSpan, normalSpan]
+  );
+  const [active, setActive] = useState(() => isNear(scrollYProgress.get()));
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    // setState bails out when the value is unchanged, so this only
+    // re-renders on actual section boundaries, not every scroll tick.
+    setActive(isNear(v));
+  });
+
   return (
     <motion.div
       className="absolute inset-0 will-change-transform"
       style={{ x }}
+      inert={!active}
     >
       {section.type === "hero" && <HeroPanel {...panelProps} />}
       {section.type === "service" && section.service && (
@@ -1161,7 +1280,8 @@ function TopNav({
   const navOpacity = useTransform(scrollYProgress, [0, heroSpan * 0.7, heroSpan * 0.9, 1], [0, 0, 1, 1]);
 
   return (
-    <motion.div
+    <motion.nav
+      aria-label="Page sections"
       className="fixed top-0 left-0 right-0 h-[64px] sm:h-[76px] z-[55] hidden md:flex items-center px-8 pointer-events-none"
       style={{ opacity: navOpacity }}
     >
@@ -1211,7 +1331,7 @@ function TopNav({
           })}
         </div>
       </div>
-    </motion.div>
+    </motion.nav>
   );
 }
 
@@ -1348,12 +1468,22 @@ function TopDot({
     if (!container) return;
     const totalHeight = container.scrollHeight - window.innerHeight;
     const target = container.offsetTop + totalHeight * snapPoint;
+    // Hold the auto-snap off while this scroll is in flight — its debounce
+    // can fire mid-scroll (the timer survives main-thread jank) and read a
+    // position still near the START, deciding the "nearest" section is the
+    // one the user just left and yanking the page back.
+    suppressAutoSnap();
     window.scrollTo({ top: target, behavior: "smooth" });
   }, [containerRef, snapPoint]);
 
   return (
-    <div
-      className="relative z-10 group w-14 h-14 flex items-center justify-center cursor-pointer pointer-events-auto"
+    // Real <button>, not a clickable div — keyboard users get Enter/Space
+    // activation and screen readers announce a labelled control. The
+    // focus-visible ring mirrors SectionNav's.
+    <button
+      type="button"
+      aria-label={`Go to ${label}`}
+      className="relative z-10 group w-14 h-14 flex items-center justify-center cursor-pointer pointer-events-auto rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#230F2C] focus-visible:ring-offset-2"
       onClick={handleClick}
     >
       {/* Hand-drawn white circle puck — fills the 56px hit area so the icon
@@ -1370,8 +1500,8 @@ function TopDot({
 
       {/* Hover tooltip — sits below the dot in the brand's headline font
           (Averia Gruesa Libre). Pure CSS group-hover so it fires even if
-          React state updates lag the pointer. */}
-      <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 whitespace-nowrap font-headline text-sm text-[#230F2C]/70 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+          React state updates lag the pointer; also shown on keyboard focus. */}
+      <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-2 whitespace-nowrap font-headline text-sm text-[#230F2C]/70 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-150">
         {label}
       </span>
 
@@ -1405,7 +1535,7 @@ function TopDot({
           <div className="w-[7px] h-[7px] rounded-full bg-[#230F2C]/40" />
         )}
       </motion.div>
-    </div>
+    </button>
   );
 }
 
@@ -1491,6 +1621,37 @@ function ScrollIndicator({
 }
 
 /**
+ * Programmatic-scroll guard. While a TopDot (or other deliberate) scroll is
+ * animating toward its target, the auto-snap must stand down: its debounce
+ * timer can fire mid-flight (timers survive main-thread jank even when
+ * scroll events stall) and read a position still near the START of the
+ * journey — concluding the "nearest" section is the one the user just left
+ * and smoothly yanking the page right back. Module-level because TopDot and
+ * useScrollSnap are separate components sharing one window scroll.
+ * `scrollend` clears the guard as soon as the scroll settles; the timeout
+ * is a fallback for browsers without the event (Safari < 18.4).
+ */
+let autoSnapSuppressed = false;
+let autoSnapTimer: ReturnType<typeof setTimeout> | null = null;
+/**
+ * Deep-link slug stash surviving StrictMode's mount→unmount→mount cycle —
+ * the first effect run consumes the URL hash / sessionStorage key, so the
+ * re-run needs this to repeat the jump (see the deep-link effect).
+ */
+let pendingDeepLinkSlug: string | null = null;
+function suppressAutoSnap() {
+  autoSnapSuppressed = true;
+  if (autoSnapTimer) clearTimeout(autoSnapTimer);
+  const clear = () => {
+    autoSnapSuppressed = false;
+    if (autoSnapTimer) clearTimeout(autoSnapTimer);
+    window.removeEventListener("scrollend", clear);
+  };
+  window.addEventListener("scrollend", clear, { once: true });
+  autoSnapTimer = setTimeout(clear, 2500);
+}
+
+/**
  * Auto-snap at rest: if the user stops scrolling within a threshold of a
  * section boundary, smoothly scroll to the nearest snap point.
  *
@@ -1529,7 +1690,19 @@ function useScrollSnap(
     }
 
     const handleScrollEnd = () => {
-      const progress = scrollYProgress.get();
+      if (autoSnapSuppressed) return;
+      // Compute progress from the live scroll position rather than
+      // scrollYProgress.get() — framer updates that value on its own rAF
+      // loop, so right after a long programmatic smooth-scroll it can
+      // still hold a stale (near-old-position) value. Snapping against
+      // the stale reading occasionally yanked the page back to the hero
+      // after a TopDot click.
+      const totalHeight = container.scrollHeight - window.innerHeight;
+      if (totalHeight <= 0) return;
+      const progress = Math.max(
+        0,
+        Math.min(1, (window.scrollY - container.offsetTop) / totalHeight)
+      );
 
       // Find which section boundary we're nearest
       let bestTarget = 0;
@@ -1551,7 +1724,6 @@ function useScrollSnap(
       // "Within threshold" means: we're close to a snap point but not at it
       const normalizedDist = bestDist / span;
       if (normalizedDist > 0.01 && normalizedDist < SNAP_THRESHOLD) {
-        const totalHeight = container.scrollHeight - window.innerHeight;
         const targetScroll = container.offsetTop + totalHeight * bestTarget;
         window.scrollTo({ top: targetScroll, behavior: "smooth" });
       }
@@ -1627,14 +1799,29 @@ export function FullscreenScroller({ services }: FullscreenScrollerProps) {
     // Always clear the pending marker — even if nothing matches, we don't
     // want it lingering and triggering a jump on a later accidental refresh.
     sessionStorage.removeItem("pending-section");
-    if (!slug) return;
 
     // "about" isn't a service, but it has its own panel in the scroller.
-    const target = sections.find((s) => {
-      if (s.type === "service") return s.service?.slug === slug;
-      return s.id === slug; // e.g. "about"
-    });
-    if (!target) return;
+    const target = slug
+      ? sections.find((s) => {
+          if (s.type === "service") return s.service?.slug === slug;
+          return s.id === slug; // e.g. "about"
+        })
+      : undefined;
+    // StrictMode runs this effect twice: the FIRST run consumes the hash /
+    // sessionStorage key, so without the module-level stash the second run
+    // would see no slug, bail, and the first run's cleanup would have
+    // already cancelled the retries — leaving the browser's deferred
+    // load-scroll free to reset the page to the top. Stash the resolved
+    // slug so the re-run can repeat the jump.
+    if (target) pendingDeepLinkSlug = slug;
+    else if (!pendingDeepLinkSlug) return;
+    const resolved =
+      target ??
+      sections.find((s) => {
+        if (s.type === "service") return s.service?.slug === pendingDeepLinkSlug;
+        return s.id === pendingDeepLinkSlug;
+      });
+    if (!resolved) return;
 
     // Compute the target section's snap point using the same math as
     // useSectionTiming so they stay in sync.
@@ -1650,16 +1837,58 @@ export function FullscreenScroller({ services }: FullscreenScrollerProps) {
     const heroSpan = (1 + HERO_EXTRA_VH + HERO_COLLAPSE_VH) / totalVHUnits;
     const normalSpan = 1 / totalVHUnits;
     const snapPoint =
-      target.index === 0 ? 0 : heroSpan + (target.index - 1) * normalSpan;
+      resolved.index === 0 ? 0 : heroSpan + (resolved.index - 1) * normalSpan;
 
     const container = containerRef.current;
     if (!container) return;
 
-    const scrollRange = container.scrollHeight - window.innerHeight;
-    window.scrollTo({
-      top: container.offsetTop + scrollRange * snapPoint,
-      behavior: "instant" as ScrollBehavior,
-    });
+    // The target offset must be computed at JUMP time, not effect time: on
+    // a full page load this layout effect can run before the scroller's
+    // 860vh container has a layout, when `scrollHeight - innerHeight` is
+    // still 0 — a captured target would aim every attempt at the top.
+    const jump = () => {
+      const range = container.scrollHeight - window.innerHeight;
+      if (range <= 0) return;
+      window.scrollTo({
+        top: container.offsetTop + range * snapPoint,
+        behavior: "instant" as ScrollBehavior,
+      });
+    };
+    // Take scroll restoration away from the browser for this load: on a
+    // fresh navigation Chrome applies its own deferred scroll (top, or the
+    // hash fragment — which matches no element here) after load completes,
+    // overriding this jump no matter how often we re-assert it.
+    history.scrollRestoration = "manual";
+    jump();
+    // Re-assert over the next couple of seconds: layout may not exist yet
+    // on the first attempt (see above), and the browser's deferred
+    // load-scroll / late hydration work can reset the position to the top
+    // after it succeeds. Only re-jump when still on the homepage AND the
+    // position looks reset-shaped (near 0 while the target is far below) —
+    // a user who scrolled on their own, or a route change, is left alone.
+    // Deliberately NOT cancelled in a cleanup: StrictMode's double-mount
+    // would kill the timers before they can do their job; the guards make
+    // stray firings harmless.
+    [100, 400, 1000, 2000].forEach((ms) =>
+      setTimeout(() => {
+        const range = container.scrollHeight - window.innerHeight;
+        const top = container.offsetTop + range * snapPoint;
+        if (
+          window.location.pathname === "/" &&
+          top > 100 &&
+          window.scrollY < Math.min(top * 0.1, 200)
+        ) {
+          jump();
+        }
+      }, ms)
+    );
+    // Hand scroll restoration back and expire the StrictMode stash once
+    // the load has settled, so back/forward keeps native behavior and a
+    // later return to the homepage doesn't replay the jump.
+    setTimeout(() => {
+      history.scrollRestoration = "auto";
+      pendingDeepLinkSlug = null;
+    }, 3000);
     // Clear the hash so refreshes don't re-trigger the jump.
     if (hashSlug) {
       history.replaceState(null, "", window.location.pathname);

@@ -287,9 +287,12 @@ export function Topbar() {
               {onHomepage ? (
                 <div className="flex-1" />
               ) : (
-                <div className="hidden md:flex flex-1 items-center justify-center px-6">
+                <nav
+                  aria-label="Sections"
+                  className="hidden md:flex flex-1 items-center justify-center px-6"
+                >
                   <SectionNav activeId={activeSectionId} tone="dark" />
-                </div>
+                </nav>
               )}
 
               <motion.div
@@ -345,18 +348,22 @@ export function Topbar() {
                   </span>
                 </Link>
 
+                {/* Hover: the two lines wiggle apart with a hand-drawn tilt
+                    (mirrors the logo's playful hover). The open-state X
+                    morph lives in Navigation's close button, which sits at
+                    these exact coordinates above the overlay. */}
                 <button
-                  onClick={() => setMenuOpen(true)}
-                  className="relative z-50 flex flex-col items-center justify-center w-10 h-10 gap-[5px]"
-                  aria-label="Open menu"
+                  onClick={() => setMenuOpen((open) => !open)}
+                  className="group relative z-50 flex flex-col items-center justify-center w-11 h-11 gap-[5px]"
+                  aria-label={menuOpen ? "Close menu" : "Open menu"}
                   aria-expanded={menuOpen}
                 >
                   <span
-                    className="block w-5 h-[1.5px] transition-transform"
+                    className="block w-5 h-[1.5px] transition-transform duration-200 ease-out group-hover:-translate-y-[2px] group-hover:rotate-[-8deg] group-focus-visible:-translate-y-[2px] group-focus-visible:rotate-[-8deg]"
                     style={{ backgroundColor: "#230F2C" }}
                   />
                   <span
-                    className="block w-5 h-[1.5px] transition-transform"
+                    className="block w-5 h-[1.5px] transition-transform duration-200 ease-out group-hover:translate-y-[2px] group-hover:rotate-[6deg] group-focus-visible:translate-y-[2px] group-focus-visible:rotate-[6deg]"
                     style={{ backgroundColor: "#230F2C" }}
                   />
                 </button>

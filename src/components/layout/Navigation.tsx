@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { RadiatingBolts } from "@/components/effects/RadiatingBolts";
 import { servicesList } from "@/data/services";
 
@@ -37,48 +36,6 @@ const links = [
   { label: "Contact", href: "/contact" },
 ];
 
-const overlayVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { type: "spring", damping: 30, stiffness: 250 },
-  },
-  exit: {
-    opacity: 0,
-    transition: { duration: 0.25, ease: "easeOut" },
-  },
-};
-
-const linkContainerVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.15,
-    },
-  },
-  exit: {
-    transition: {
-      staggerChildren: 0.04,
-      staggerDirection: -1,
-    },
-  },
-};
-
-const linkItemVariants: Variants = {
-  hidden: { opacity: 0, x: 40 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { type: "spring", damping: 25, stiffness: 200 },
-  },
-  exit: {
-    opacity: 0,
-    x: -20,
-    transition: { duration: 0.2 },
-  },
-};
-
 export function Navigation({ isOpen, onClose }: NavigationProps) {
   const navRef = useRef<HTMLDivElement>(null);
 
@@ -98,36 +55,56 @@ export function Navigation({ isOpen, onClose }: NavigationProps) {
     };
   }, [isOpen, onClose]);
 
+  // The overlay stays MOUNTED and animates between states instead of using
+  // AnimatePresence exit: after the upstream navbar rework, the exit pass
+  // stopped completing, leaving an invisible full-screen overlay that
+  // swallowed every click on the page. Keeping it mounted with
+  // `inert` + pointer-events:none while closed is more robust and also
+  // removes the hidden menu from the tab order / accessibility tree.
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          ref={navRef}
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/80 backdrop-blur-xl"
-          variants={overlayVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Site navigation"
-        >
-          {/* Close button */}
+    <div
+      ref={navRef}
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/80 backdrop-blur-xl transition-opacity duration-300 ease-out ${
+        isOpen ? "opacity-100" : "opacity-0"
+      }`}
+      style={{ pointerEvents: isOpen ? "auto" : "none" }}
+      inert={!isOpen}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Site navigation"
+    >
+          {/* Close button — positioned exactly over the Topbar hamburger
+              (same right padding + bar height + hit area) and built from
+              the same two lines, which rotate from parallel into an X as
+              the overlay fades in. Reads as the burger itself morphing
+              rather than a separate ✕ appearing elsewhere. */}
           <button
             onClick={onClose}
-            className="absolute top-8 right-8 flex items-center justify-center w-10 h-10 text-white/60 hover:text-white transition-colors"
+            className="absolute top-0 right-8 sm:right-10 md:right-12 h-[64px] sm:h-[76px] flex items-center text-white/80 hover:text-white transition-colors"
             aria-label="Close menu"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
+            <span className="relative flex items-center justify-center w-11 h-11">
+              <span
+                className={`absolute block w-5 h-[1.5px] bg-current transition-transform duration-300 ease-out ${
+                  isOpen ? "translate-y-0 rotate-45" : "-translate-y-[3.25px] rotate-0"
+                }`}
+                style={{ transitionDelay: isOpen ? "120ms" : "0ms" }}
+              />
+              <span
+                className={`absolute block w-5 h-[1.5px] bg-current transition-transform duration-300 ease-out ${
+                  isOpen ? "translate-y-0 -rotate-45" : "translate-y-[3.25px] rotate-0"
+                }`}
+                style={{ transitionDelay: isOpen ? "120ms" : "0ms" }}
+              />
+            </span>
           </button>
 
           {/* Footer bar — mirrors the services-page footer, white text, yellow heart/rays */}
           <div className="absolute bottom-0 left-0 right-0 py-5 px-8 sm:px-16 md:px-24 lg:px-32 border-t border-white/10">
-            <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
-              <div className="flex items-center gap-3 flex-1">
+            {/* Stacks below `sm` — three-across overflows the right edge on
+                phone widths and clipped the LinkedIn link. */}
+            <div className="max-w-7xl mx-auto flex flex-col items-center gap-3 sm:flex-row sm:justify-between sm:gap-6">
+              <div className="hidden sm:flex items-center gap-3 sm:flex-1">
                 <span
                   aria-hidden
                   className="block h-7 w-7 shrink-0"
@@ -145,7 +122,9 @@ export function Navigation({ isOpen, onClose }: NavigationProps) {
                 />
                 <span className="font-headline text-xl leading-none text-white">Startle Labs</span>
               </div>
-              <p className="font-handwritten text-xl flex items-center gap-2 text-white">
+              {/* div, not <p>: RadiatingBolts renders <div>s, which are
+                  invalid inside a paragraph and caused hydration errors. */}
+              <div className="font-handwritten text-xl flex items-center gap-2 text-white">
                 Hand-drawn with
                 <span className="relative group inline-block" style={{ width: 24, height: 24 }}>
                   <Image
@@ -158,9 +137,9 @@ export function Navigation({ isOpen, onClose }: NavigationProps) {
                   <RadiatingBolts color="#e9c402" scale={0.12} bolts={HEART_BOLTS} />
                 </span>
                 in TLV
-              </p>
-              <div className="flex-1 flex justify-end">
-                <a href="https://linkedin.com/in/shaidavis" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm uppercase tracking-[0.2em] font-semibold text-white hover:opacity-70 transition-opacity">
+              </div>
+              <div className="sm:flex-1 flex sm:justify-end">
+                <a href="https://linkedin.com/in/shaidavis" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 py-3 -my-3 text-sm uppercase tracking-[0.2em] font-semibold text-white hover:opacity-70 transition-opacity">
                   LinkedIn
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -179,28 +158,32 @@ export function Navigation({ isOpen, onClose }: NavigationProps) {
             </div>
           </div>
 
-          {/* Links — Haze spacing: gap 24px, padding 64px desktop / 32px phone */}
-          <motion.nav
-            className="flex flex-col items-center gap-6 px-8 py-8 sm:px-16 sm:py-16"
-            variants={linkContainerVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-          >
-            {links.map((link) => (
-              <motion.a
+          {/* Links — Haze spacing: gap 24px, padding 64px desktop / 32px phone.
+              CSS-staggered entrance: each link slides in from the right with
+              an increasing transition-delay while the overlay fades. */}
+          <nav className="flex flex-col items-center gap-6 px-8 py-8 sm:px-16 sm:py-16">
+            {links.map((link, i) => (
+              <a
                 key={link.href}
                 href={link.href}
-                className="text-3xl sm:text-4xl font-light text-white/70 uppercase tracking-[0.2em] hover:text-white transition-colors"
-                variants={linkItemVariants}
+                className={`grid font-headline text-3xl sm:text-4xl text-center text-white/70 lowercase hover:uppercase tracking-[0.08em] hover:text-white transition-[opacity,transform,color] duration-300 ease-out ${
+                  isOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"
+                }`}
+                style={{ transitionDelay: isOpen ? `${150 + i * 60}ms` : `${i * 30}ms` }}
                 onClick={onClose}
               >
-                {link.label}
-              </motion.a>
+                {/* Always-uppercase invisible ghost reserves the cell to the
+                    uppercase footprint, so flipping case on hover doesn't
+                    resize/reflow the link. The visible label inherits the
+                    link's case (lowercase → uppercase on hover) and is
+                    centered over the ghost in the same grid cell. */}
+                <span aria-hidden className="col-start-1 row-start-1 invisible uppercase">
+                  {link.label}
+                </span>
+                <span className="col-start-1 row-start-1">{link.label}</span>
+              </a>
             ))}
-          </motion.nav>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </nav>
+    </div>
   );
 }

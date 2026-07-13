@@ -11,14 +11,14 @@ const nextConfig: NextConfig = {
   //   /strategy        → /#brand-strategy   (panel)
   //   /presentations   → /#creative-direction
   //   /websites        → /#digital-design
-  //   /about           → /#about
   //   /contact         → /#contact
   //
-  // Redirects run BEFORE file-system routing, so /about and /contact above
-  // intentionally supersede the standalone /about and /contact page files —
-  // we only have the one Yalla/About flow now (the homepage scroller).
-  // Status 307 (permanent: false) keeps things flexible while the URL
-  // structure is still settling.
+  // Redirects run BEFORE file-system routing, so /contact above
+  // intentionally supersedes the standalone contact page file — the
+  // homepage scroller's Yalla panel is the one contact surface. /about is
+  // NOT redirected: the standalone About page is live and linked from the
+  // homepage's "Learn More". Status 307 (permanent: false) keeps things
+  // flexible while the URL structure is still settling.
   async redirects() {
     return [
       { source: "/strategy", destination: "/#brand-strategy", permanent: false },
