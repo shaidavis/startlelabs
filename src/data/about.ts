@@ -20,13 +20,6 @@ export interface Value {
   body: string;
 }
 
-export interface Milestone {
-  date: string;
-  heading: string;
-  body: string;
-  tag?: string;
-}
-
 export interface FAQ {
   question: string;
   answer: string;
@@ -48,9 +41,18 @@ export interface AboutData {
     heading: string;
     body: string;
   };
-  timeline: {
+  /**
+   * First-person founder section. Deliberately short — the pull quote and the
+   * client descriptors carry it, so the body stays three sentences.
+   */
+  aboutMe: {
+    /** Client pull-quote that opens the section. */
+    pullQuote: string;
+    pullQuoteAttribution: string;
+    /** Verbatim "describe Shai in 3-5 words" answers from the testimonial form. */
+    descriptors: string[];
     heading: string;
-    milestones: Milestone[];
+    body: string;
   };
   portfolio: {
     heading: string;
@@ -77,18 +79,18 @@ export const aboutData: AboutData = {
       cards: [
         {
           image: "",
-          heading: "Born from frustration",
-          body: "Too many great ideas were falling flat because their packaging didn't match their ambition. We started Startle Labs to fix that.",
+          heading: "Good ideas, bad packaging",
+          body: "Too many strong companies were getting overlooked because their deck, their name, or their site undersold them. Startle Labs opened in Tel Aviv in 2015 to close that gap.",
         },
         {
           image: "",
-          heading: "A small team, big opinions",
-          body: "From day one we operated on the belief that brand strategy and visual craft are inseparable — you can't do one without the other.",
+          heading: "Questions before pixels",
+          body: "The habit that stuck from the first project: ask uncomfortable, context-heavy questions until the strategy is obvious. The design part gets easy after that.",
         },
         {
           image: "",
-          heading: "First client, first lesson",
-          body: "Our first engagement taught us that the most valuable thing we could offer was a clear point of view, not just execution.",
+          heading: "One founder at a time",
+          body: "No account managers, no handoff to a junior. The person you brief is the person who does the work — which is why clients kept coming back.",
         },
       ],
     },
@@ -97,18 +99,18 @@ export const aboutData: AboutData = {
       cards: [
         {
           image: "",
-          heading: "Growing deliberately",
-          body: "We take on a handful of projects at a time so every client gets our full attention. Quality over volume — always.",
+          heading: "Named, launched, funded",
+          body: "Brands named and built, sites shipped, and investor decks behind rounds that closed — across AI, fintech, food tech, nonprofit, and culture.",
         },
         {
           image: "",
-          heading: "Studio + partners",
-          body: "We've built a tight network of specialists — developers, photographers, copywriters — who plug in when projects need it.",
+          heading: "Small, on purpose",
+          body: "Deliberately small, with a tight bench of developers, illustrators, and animators who plug in when a project needs them.",
         },
         {
           image: "",
-          heading: "Doing work we're proud of",
-          body: "Every project ships with the same question: would we put this in our portfolio? If the answer is no, we keep going.",
+          heading: "Referrals, not ads",
+          body: "Nearly every testimonial on this page says a version of the same thing: they recommended us to someone else. That's the only growth metric worth tracking.",
         },
       ],
     },
@@ -455,46 +457,17 @@ export const aboutData: AboutData = {
     heading: "Connection isn't a skill — it's a choice.",
     body: "Every brand has the chance to mean something to the people it serves. Most waste it chasing what's fashionable. We're here to help you make the other choice: to show up honestly, look the part, and give your audience a reason to believe. That's what great branding does. That's what we're here to build.",
   },
-  timeline: {
-    heading: "How we got here",
-    milestones: [
-      {
-        date: "2019",
-        tag: "Day 1",
-        heading: "Studio founded",
-        body: "Startle Labs opens its doors in Toronto with a single focus: brand identity for early-stage companies.",
-      },
-      {
-        date: "2020",
-        tag: "First ship",
-        heading: "First full rebrand",
-        body: "We complete our first major rebrand — a fintech startup that needed to look trustworthy without looking boring.",
-      },
-      {
-        date: "2021",
-        tag: "Growth",
-        heading: "Team grows to 4",
-        body: "We bring on our first full-time strategist and hire a senior designer to handle the growing workload.",
-      },
-      {
-        date: "2023",
-        tag: "New home",
-        heading: "New studio space",
-        body: "We move into a proper studio in the west end and start hosting quarterly brand workshops for the local community.",
-      },
-      {
-        date: "2024",
-        tag: "Milestone",
-        heading: "40+ brands built",
-        body: "We cross a milestone: over forty brand identities shipped, spanning SaaS, consumer, nonprofit, and culture sectors.",
-      },
-      {
-        date: "2026",
-        tag: "Today",
-        heading: "What's next",
-        body: "We're deepening our work in strategy and digital product — helping brands not just look sharp, but live sharp across every surface.",
-      },
+  aboutMe: {
+    pullQuote: "I only recommend Shai to founders and execs.",
+    pullQuoteAttribution: "Richard Demb, ten years a client",
+    descriptors: [
+      "Creative, resourceful, dependable",
+      "Visionary, reliable, results-driven",
+      "Professional, responsive, adaptable",
+      "Talented, professional & kind",
     ],
+    heading: "The boring part",
+    body: "I'd rather not write about myself, so I've let other people do it above. I'm Shai. I've run Startle Labs out of Tel Aviv since 2015, naming things, writing things, and designing the decks and websites that decide whether anyone takes your company seriously. I work with a handful of founders at a time, directly — and I'll tell you when an idea needs work before I make it look good.",
   },
   portfolio: {
     heading: "Work we've shipped",
@@ -518,10 +491,6 @@ export const aboutData: AboutData = {
     {
       question: "What does the process look like?",
       answer: "We start with discovery (research, stakeholder interviews, competitive audit), move into strategy (positioning, messaging, brand pillars), then into design. We work in collaborative rounds with feedback loops built in throughout.",
-    },
-    {
-      question: "How much does a project cost?",
-      answer: "Projects start at $15K for brand identity and scale based on scope and complexity. We're transparent about pricing from the first conversation — no surprises.",
     },
     {
       question: "Can you help us after the brand launches?",
