@@ -2,7 +2,7 @@
 
 **Last reconciled:** 2026-07-30 · **Branch:** merged to `main` @ `9bc2bcc`
 
-The correctness work is **done and shipped**. What's left is content Shai has to supply
+The correctness work and the Venn are **done and shipped**. What is left is content Shai has to supply
 (quotes, screenshots, logos) plus three copy decisions and the Venn.
 
 Sources: `src/data/services.ts`, `src/data/about.ts`, `ServicePageTemplate.tsx`,
@@ -123,32 +123,36 @@ you want the same treatment.
 - 2 pre-existing lint errors (`set-state-in-effect` in `Topbar.tsx:71`,
   `FullscreenScroller.tsx:143`). Unrelated to launch, left alone deliberately.
 
-### M5. Creativity Venn ⚪ · separate session, not a launch blocker
+### M5. Creativity Venn ✅ · DONE — built, placed, shipping
 
-Prior art in-repo: `/values-venn` route, `InteractiveVennCanvas`, `ValuesVennHero`,
-`RadiatingBolts`, `LightningEffect`, Framer Motion via `MotionProvider`.
+**This was never outstanding.** The original brief listed it as blocker #6, and earlier
+drafts of this plan proposed three "directions" at 4–16h each. That was wrong — written
+from filenames rather than from reading the code.
 
-**Direction 1 — Scroll-Driven Convergence.** ~4–6h
-Three labelled circles start apart, scroll-scrub drives them into overlap; the center
-lights up with `RadiatingBolts` at full intersection. Uses `useScrollProgress`, which
-already exists. *Lowest risk, reads clearly on mobile, no canvas work.*
+`InteractiveVennCanvas` is a finished 475-line canvas component
+(`src/components/about/InteractiveVennCanvas.tsx`) and it is **live on the homepage** as
+the About panel (`FullscreenScroller.tsx:624`), beside "Creativity is at the center."
 
-**Direction 2 — Hand-Drawn Ink Bloom.** ~8–12h
-Circles draw themselves in as rough ink strokes (SVG `stroke-dashoffset`), overlaps bloom
-with the grunge texture from `src/lib/texture.ts` via `mix-blend-mode`. *Best fit with the
-site's hand-drawn identity. Real risk: three overlapping blend layers behave badly on
-Safari mobile.*
+**The placement is deliberate and correct.** The homepage panel *is* the About splash;
+`/about` is the extended page reached via its "Learn More" CTA. The Venn does not belong
+on `/about` — putting it there would duplicate the splash. Nothing to move.
 
-**Direction 3 — Interactive Drag.** ~12–16h+
-Visitor drags the circles; labels rewrite as regions overlap. Extends
-`InteractiveVennCanvas`. *Highest payoff, highest risk. Needs real touch handling, a
-reduced-motion path, and a keyboard-accessible fallback — that last one is what actually
-sinks the estimate.*
+Already implemented:
+- Three blobs (Connection / Curiosity / Confidence) animating in one at a time with icons
+- Creativity popping in at centre with lightning
+- Three pairwise lenses (Leadership / Artistry / Empathy) writing themselves in last
+- Hover pours energy into the blobs beneath; hovering Creativity lights all three
+- Scroll-gated intro via the `scrollTrigger` prop
+- `prefers-reduced-motion` handling; DPR-capped retina canvas
+- `chrome` / `caption` / `replayNonce` props; homepage drives replay from its own CTA
+- Descriptive `aria-label` naming all four concepts
+- Reference page at `/values-venn`, unlinked from nav
 
-> 💡 **Recommendation: Direction 1, separate session.** ~80% of the "whoa" for ~30% of the
-> cost. Confirming the original brief's instinct: **not a launch blocker.** The About page
-> already carries a reviews marquee, story cards, values, manifesto, founder section,
-> portfolio embed, and FAQs. It is not thin without a Venn.
+**The one genuine open item — optional, ~2h, not a launch blocker:**
+interaction is hover-only. No `tabIndex`, `onKeyDown`, or `onFocus`, so keyboard and
+touch users get the intro animation and the `aria-label` but not the per-region reveals.
+Fix would be focusable per-region buttons driving the same `hoverMask` state. Worth doing
+eventually; not a regression, and not something to hold launch for.
 
 ---
 
