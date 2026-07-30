@@ -68,7 +68,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h1 className="font-headline text-5xl md:text-6xl leading-[1.05] tracking-tight mb-6">
+              <h1 className="font-headline text-5xl md:text-6xl leading-[1.05] tracking-tight mb-6 text-balance">
                 {data.hero.heading}
               </h1>
               <p className="text-base sm:text-lg leading-relaxed" style={{ color: `${INK}cc` }}>
@@ -273,7 +273,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
                   strokeLinejoin="round"
                 />
               </svg>
-              <h2 className="font-headline text-4xl md:text-5xl leading-[1.05]">
+              <h2 className="font-headline text-4xl md:text-5xl leading-[1.05] text-balance">
                 {data.manifesto.heading}
               </h2>
             </motion.div>
@@ -290,6 +290,61 @@ export function AboutTemplate({ data }: { data: AboutData }) {
           </div>
         </section>
 
+
+        {/* ─── 6. About me (first person, PAGE_BG) ─────────── */}
+        <section
+          className="relative px-8 sm:px-16 md:px-24 lg:px-32 pt-24 sm:pt-28 pb-24 sm:pb-28"
+          style={{ backgroundColor: PAGE_BG }}
+        >
+          <div className="relative z-10 max-w-3xl mx-auto">
+            <motion.blockquote
+              className="font-headline text-2xl sm:text-4xl md:text-5xl leading-[1.15] text-center text-balance"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              &ldquo;{data.aboutMe.pullQuote}&rdquo;
+              <footer className="mt-5 text-xs uppercase tracking-[0.2em] font-sans font-semibold opacity-60">
+                {data.aboutMe.pullQuoteAttribution}
+              </footer>
+            </motion.blockquote>
+
+            <motion.ul
+              className="mt-12 flex flex-wrap justify-center gap-x-3 gap-y-3"
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
+              {data.aboutMe.descriptors.map((d) => (
+                <motion.li
+                  key={d}
+                  variants={fadeInUp}
+                  className="font-handwritten text-lg sm:text-xl px-4 py-1.5 rounded-3xl"
+                  style={{ backgroundColor: `${ORANGE}1f`, color: ORANGE }}
+                >
+                  {d}
+                </motion.li>
+              ))}
+            </motion.ul>
+
+            <motion.div
+              className="mt-14"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+            >
+              <h2 className="font-headline text-2xl sm:text-3xl mb-4">
+                {data.aboutMe.heading}
+              </h2>
+              <p className="text-base sm:text-lg leading-relaxed opacity-80">
+                {data.aboutMe.body}
+              </p>
+            </motion.div>
+          </div>
+        </section>
 
         {/* ─── 7. Portfolio (Notion embed, WHITE) ──────────── */}
         <section
@@ -355,7 +410,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
               >
                 FAQs
               </div>
-              <h2 className="font-headline text-3xl md:text-4xl leading-tight">
+              <h2 className="font-headline text-3xl md:text-4xl leading-tight text-balance">
                 The questions we hear most.
               </h2>
             </div>
@@ -423,7 +478,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
           />
           <div className="relative z-10 max-w-4xl mx-auto text-center">
             <motion.h2
-              className="font-headline text-5xl md:text-6xl leading-tight mb-10"
+              className="font-headline text-4xl sm:text-5xl md:text-6xl leading-tight mb-10 text-balance"
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
