@@ -2,8 +2,8 @@
 
 **Last reconciled:** 2026-07-30 · **Branch:** merged to `main` @ `9bc2bcc`
 
-The correctness work and the Venn are **done and shipped**. What is left is content Shai has to supply
-(quotes, screenshots, logos) plus three copy decisions and the Venn.
+The correctness work and the Venn are **done and shipped**. What is left is content Shai
+has to supply — quotes, screenshots, logos — plus three copy decisions.
 
 Sources: `src/data/services.ts`, `src/data/about.ts`, `ServicePageTemplate.tsx`,
 `AboutTemplate.tsx`, the Notion portfolio (30 projects), and
