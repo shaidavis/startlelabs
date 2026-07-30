@@ -5,57 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { services, type Service } from "@/data/services";
 import { TornEdge } from "@/components/ui/TornEdge";
-import { SectionBackground } from "@/components/ui/SectionBackground";
 import { grungeBackground } from "@/lib/texture";
-
-/**
- * Figma-exported section backgrounds. When a new section's SVG lands in
- * /public/images/backgrounds/, copy the first path's `d` attribute here and
- * the component pulls the exact hand-drawn shape from Figma.
- */
-const FIGMA_BG = {
-  stats: {
-    path:
-      "M560 20.4636L-24.5 0L-89 412L788 391.536L1501 344.698L1459 64.1192L1016 20.4636H560Z",
-    viewBox: "0 0 1440 412",
-  },
-  deliverables: {
-    path: "M0 25.6051L721.5 0H1440V949.567L445 967L0 949.567V25.6051Z",
-    viewBox: "0 0 1440 967",
-  },
-  // Page-tear shape (torn top + torn bottom) used for the mid-page quote.
-  // Source: /public/images/backgrounds/Quote.svg — second path (the filled
-  // polygon). The SVG also has baked-in text glyphs we don't want, so we
-  // only copy the shape path here.
-  // Visual breakdown of the path (in internal coords, viewBox 0 0 1440 656):
-  //   - torn TOP edge at y≈126–168 (≈19–26% from top of viewBox)
-  //   - torn BOTTOM edge at y≈490–539 (≈75–82% from top)
-  // So when stretched to a section's bounds, the top 19% and bottom 18% of
-  // the section are TRANSPARENT — sections above/below show through. We
-  // negative-margin this section up to overlap the dark deliverables
-  // section so the top strip reads as "dark tearing into accent".
-  quote: {
-    path: "M-1 126L500 168.996L1007 126L1440 150V539L1007 490.368L-1 539V126Z",
-    viewBox: "0 0 1440 656",
-  },
-  // The Figma Principles export has a blue polygon (service accent) sitting
-  // on top of a dark navy extension. We render just the blue shape here; the
-  // dark continuation lives in the closing CTA section below.
-  principles: {
-    path:
-      "M1440 147L949.5 235.5L432 187L-1 259.439V1433.55L432 1524.5L1005.5 1584.5L1440 1433.55V147Z",
-    viewBox: "0 147 1440 1437",
-  },
-  closingCta: {
-    path: "M0 0H1440V1291L957 1267L754.5 1250L301.5 1307L0 1291V0Z",
-    viewBox: "0 0 1440 1307",
-  },
-  otherServices: {
-    path:
-      "M1457.5 63.415V503.818L964.663 495.531L755.758 489.596L755.368 489.599L288.061 509.497L-17.5 504.01V63.6426L329.236 36.5195L991.706 5.51562L1457.5 63.415Z",
-    viewBox: "0 0 1440 515",
-  },
-};
 
 /**
  * Services detail page — scaffolded to match the Figma wireframe (802:4390).

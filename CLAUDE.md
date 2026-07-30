@@ -31,7 +31,7 @@ never guess. (Route params are async: `params: Promise<{ slug: string }>` — se
 
 ## Commands (verified in package.json)
 
-- Dev: `npm run dev` → `next dev` (**port 3000**, pinned via `.claude/launch.json`).
+- Dev: `npm run dev` → `next dev` (**port 3100**, pinned via `.claude/launch.json`).
 - Build: `npm run build` → `next build`.
 - Lint: `npm run lint` → `eslint` (flat config, ESLint 9).
 - Typecheck: `npx tsc --noEmit` (no npm script; `noEmit` is already set in tsconfig).
