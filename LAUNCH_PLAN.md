@@ -148,11 +148,10 @@ Already implemented:
 - Descriptive `aria-label` naming all four concepts
 - Reference page at `/values-venn`, unlinked from nav
 
-**The one genuine open item — optional, ~2h, not a launch blocker:**
-interaction is hover-only. No `tabIndex`, `onKeyDown`, or `onFocus`, so keyboard and
-touch users get the intro animation and the `aria-label` but not the per-region reveals.
-Fix would be focusable per-region buttons driving the same `hoverMask` state. Worth doing
-eventually; not a regression, and not something to hold launch for.
+~~The one genuine open item — hover-only interaction~~ **✅ Fixed (feat/venn-a11y).**
+All input paths now drive one region mask: taps persist (touch `pointerleave` no longer
+clears), seven invisible focusable region buttons give keyboard access in intro order,
+and the caption is an `aria-live` region (sr-only when the visible caption is off).
 
 ---
 

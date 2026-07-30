@@ -13,7 +13,9 @@ import type { MotionValue } from "framer-motion";
  *
  * Hovering a value or an overlap pours energy into the blobs underneath — they
  * surge bigger and wobble faster — and the labels brighten. Hovering Creativity
- * lights up all three at once.
+ * lights up all three at once. Tapping a region (touch) or Tab-focusing the
+ * invisible region buttons (keyboard) drives the same reveal — every input
+ * path funnels through a single mask so canvas, labels, and caption agree.
  *
  * Props:
  *  - chrome: show the hint row + replay button + hover-reveal caption (default
@@ -105,6 +107,15 @@ const HARM = [
   { k: 2, a: 0.013, s: -0.00035 },
 ];
 
+// Focusable hit targets, one per region, in intro order (blobs → star →
+// lenses) so tab order retells the animation. Anchors reuse the label
+// positions; sizes cover the label plus comfortable touch padding.
+const REGIONS: { mask: number; label: string; anchor: [number, number]; wide?: boolean }[] = [
+  ...BLOBS.map((b, i) => ({ mask: 1 << i, label: b.name, anchor: b.anchor })),
+  { mask: 7, label: `Creativity — ${FORMULA[7]}`, anchor: CENTER },
+  ...LENSES.map((l) => ({ mask: l.mask, label: `${l.name} — ${FORMULA[l.mask]}`, anchor: l.anchor, wide: true })),
+];
+
 const STAGGER = 850;
 const DUR = 1000;
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -115,7 +126,19 @@ const INK = "#230F2C";
 
 export function InteractiveVennCanvas({ chrome = true, caption = true, replayNonce = 0, scrollTrigger }: InteractiveVennCanvasProps = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const [hoverMask, setHoverMask] = useState(0);
+  // Single source of truth for the active region. Pointer hover, taps, and
+  // keyboard focus all write here; the canvas loop reads the ref each frame
+  // (it can't see React state mid-animation) while the state drives labels
+  // and the caption. Keeping them in lockstep is what makes the three input
+  // paths interchangeable.
+  const maskRef = useRef(0);
+  const setMask = (m: number) => {
+    if (maskRef.current === m) return;
+    maskRef.current = m;
+    setHoverMask(m);
+  };
   const [reduce, setReduce] = useState(false);
   const [runId, setRunId] = useState(0);
   // When a scrollTrigger is supplied, hold the intro until the panel is in view.
@@ -164,8 +187,6 @@ export function InteractiveVennCanvas({ chrome = true, caption = true, replayNon
 
     let start: number | null = null;
     let animT = 0;
-    let hovered = 0;
-    let lastMask = -1;
     let raf = 0;
     const introP = [0, 0, 0];
     const hoverP = [0, 0, 0];
@@ -207,6 +228,7 @@ export function InteractiveVennCanvas({ chrome = true, caption = true, replayNon
       ctx.clearRect(0, 0, W, H);
       ctx.globalCompositeOperation = "source-over";
 
+      const hovered = maskRef.current;
       const exciteTarget = hovered === 7 ? 1 : 0;
       exciteP = prefersReduce ? exciteTarget : lerp(exciteP, exciteTarget, 0.12);
 
@@ -320,26 +342,33 @@ export function InteractiveVennCanvas({ chrome = true, caption = true, replayNon
       return m;
     };
 
-    const onMove = (e: PointerEvent) => {
+    // Listeners live on the wrapper, not the canvas, so the transparent
+    // region buttons layered above don't swallow mouse hover — their events
+    // bubble up and hit-test the same way.
+    const wrap = wrapRef.current;
+    const maskFromEvent = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect();
       const mx = ((e.clientX - rect.left) / rect.width) * W;
       const my = ((e.clientY - rect.top) / rect.height) * H;
-      const m = maskAt(mx, my);
-      hovered = m;
-      if (m !== lastMask) { lastMask = m; setHoverMask(m); }
+      return maskAt(mx, my);
     };
-    const onLeave = () => {
-      hovered = 0;
-      if (lastMask !== 0) { lastMask = 0; setHoverMask(0); }
+    const onMove = (e: PointerEvent) => setMask(maskFromEvent(e));
+    // Taps persist their region: a touch tap ends with pointerleave, which
+    // for mouse means "clear" but for touch would instantly undo the reveal.
+    const onDown = (e: PointerEvent) => setMask(maskFromEvent(e));
+    const onLeave = (e: PointerEvent) => {
+      if (e.pointerType === "mouse") setMask(0);
     };
 
-    canvas.addEventListener("pointermove", onMove);
-    canvas.addEventListener("pointerleave", onLeave);
+    wrap?.addEventListener("pointermove", onMove);
+    wrap?.addEventListener("pointerdown", onDown);
+    wrap?.addEventListener("pointerleave", onLeave);
 
     return () => {
       cancelAnimationFrame(raf);
-      canvas.removeEventListener("pointermove", onMove);
-      canvas.removeEventListener("pointerleave", onLeave);
+      wrap?.removeEventListener("pointermove", onMove);
+      wrap?.removeEventListener("pointerdown", onDown);
+      wrap?.removeEventListener("pointerleave", onLeave);
     };
   }, [runId, active]);
 
@@ -370,7 +399,7 @@ export function InteractiveVennCanvas({ chrome = true, caption = true, replayNon
     <div className="flex flex-col items-center">
       {chrome && (
         <div className="mb-3 flex w-full max-w-[560px] items-center justify-between gap-3">
-          <span className="text-sm" style={{ color: `${INK}80` }}>Hover the blobs, the overlaps, and the centre</span>
+          <span className="text-sm" style={{ color: `${INK}80` }}>Hover, tap, or Tab through the blobs, the overlaps, and the centre</span>
           <button
             type="button"
             onClick={() => setRunId((k) => k + 1)}
@@ -382,12 +411,30 @@ export function InteractiveVennCanvas({ chrome = true, caption = true, replayNon
         </div>
       )}
 
-      <div className="relative w-full max-w-[560px]" style={{ aspectRatio: `${W} / ${H}` }}>
+      <div ref={wrapRef} className="relative w-full max-w-[560px]" style={{ aspectRatio: `${W} / ${H}` }}>
         <canvas
           ref={canvasRef}
           className="block h-full w-full cursor-crosshair"
-          aria-label="Interactive Venn diagram of Connection, Curiosity and Confidence meeting at Creativity. Hover any region to reveal its name and description."
+          aria-label="Interactive Venn diagram of Connection, Curiosity and Confidence meeting at Creativity. Hover, tap, or Tab through the regions to reveal each name."
         />
+
+        {/* Invisible focus/tap targets — the keyboard and touch path to the
+            same reveals the pointer hit-test drives. Their pointer events
+            bubble to the wrapper, so mouse hover behaves as if they weren't
+            there; focus is what they add. */}
+        {REGIONS.map((r) => (
+          <button
+            key={`region-${r.mask}`}
+            type="button"
+            aria-label={r.label}
+            onFocus={() => setMask(r.mask)}
+            onBlur={() => setMask(0)}
+            className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-white/90 ${
+              r.wide ? "h-11 w-24" : "h-14 w-14 sm:h-16 sm:w-16"
+            }`}
+            style={{ left: pctX(r.anchor[0]), top: pctY(r.anchor[1]) }}
+          />
+        ))}
 
         {/* Big three — outline icon + handwritten label; brighten on hover */}
         {BLOBS.map((b, i) => {
@@ -461,15 +508,22 @@ export function InteractiveVennCanvas({ chrome = true, caption = true, replayNon
         </div>
       </div>
 
-      {caption && (
-        <div className="mt-4 flex min-h-[52px] w-full max-w-[520px] flex-col items-center text-center">
-          {hoverMask && FORMULA[hoverMask] ? (
-            <span className="font-headline text-2xl leading-tight" style={{ color: INK }}>
-              {FORMULA[hoverMask]}
-            </span>
-          ) : null}
-        </div>
-      )}
+      {/* aria-live so keyboard/SR users hear the reveal; when the visible
+          caption is off (homepage hero mode) it still announces, just unseen. */}
+      <div
+        aria-live="polite"
+        className={
+          caption
+            ? "mt-4 flex min-h-[52px] w-full max-w-[520px] flex-col items-center text-center"
+            : "sr-only"
+        }
+      >
+        {hoverMask && FORMULA[hoverMask] ? (
+          <span className="font-headline text-2xl leading-tight" style={{ color: INK }}>
+            {FORMULA[hoverMask]}
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 }
