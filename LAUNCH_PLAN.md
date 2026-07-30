@@ -551,6 +551,84 @@ sinks the estimate.*
 
 ---
 
+---
+
+# REMAINING MISSIONS (updated 2026-07-30, after Phase A/B/D shipped)
+
+Branch `content/launch-copy` — 3 commits, pushed. Phases A, B and D1 are **done**.
+
+### M1. Fill the Selected Projects cards 🔴 · the big one
+
+Verified live: a quote-less slide (PointFive) renders an **empty yellow frame + client
+name** and nothing else. It reads as unfinished. Each card needs up to three things:
+
+| Need | Field | Status |
+|---|---|---|
+| Approved quote | `quote` + `author` + `role` | ❌ 6 of 11 missing |
+| Work screenshot | `image` — **field doesn't exist yet** | ❌ none |
+| 1–2 line description of the work | `blurb` — **field doesn't exist yet** | ❌ none |
+| Client logo | `logo` — field exists, unused | ❌ none |
+
+**Clients needing content** (Shai is chasing quotes for all of these):
+
+| Client | Service | Quote | Shot | Blurb | Notion project |
+|---|---|---|---|---|---|
+| Clalit | brand-strategy | ⬜ | ⬜ | ⬜ | HMO Messaging & Copywriting |
+| PointFive | brand-strategy | ⬜ | ⬜ | ⬜ | Cloud Optimization Brand Messaging |
+| Tastewise | creative-direction | ⬜ | ⬜ | ⬜ | Food Intelligence Brand Messaging |
+| SodaStream | creative-direction | ⬜ | ⬜ | ⬜ | Sodastream Presentation Messaging |
+| Fiverr | digital-design | ⬜ | ⬜ | ⬜ | Fiverr Brand Messaging |
+| Corpora | digital-design | ⬜ | ⬜ | ⬜ | Design Consultancy Brand & Website |
+| **R2** | ? | ⬜ | ⬜ | ⬜ | ⚠️ not in Notion — add it |
+| **Naboo** | ? | ⬜ | ⬜ | ⬜ | ⚠️ not in Notion — add it |
+
+Already complete: LGBTech, WINN.AI (brand-strategy) · bananaz, Abe's Market
+(creative-direction) · BAMAH (digital-design) — quote + author + role, no image yet.
+
+**Schema work required before assets can land** (~20 min, do once):
+
+```ts
+// services.ts — extend TestimonialEntry
+/** Work screenshot. Fills the yellow scribble frame; falls back to the empty frame. */
+image?: string;
+/** 1-2 lines on what the work actually was. Shows on every card, quote or not. */
+blurb?: string;
+```
+
+Then in `ServicePageTemplate.tsx:836-844`, render `image` inside the frame (the
+`aspect-[545/684]` box and the `TODO: drop the actual client logo/hero here` marker are
+already there waiting), and render `blurb` under `client` above the quote.
+
+> 💡 **The blurb is the highest-value item here, not the quote.** A card reading
+> *"PointFive — Positioning and messaging for a cloud-cost startup, from category name
+> to homepage"* is useful with no quote at all. A quote with no context isn't.
+> Recommend writing all 8 blurbs yourself from the Notion tags — 20 minutes, unblocks
+> nothing else, and makes every card presentable even if no quote ever arrives.
+
+**Asset spec for screenshots:** portrait-ish crops, min 640×804 (2× the 320×402 render
+box), `.webp` or `.png`, into `/public/images/work/<client>.webp`.
+
+### M2. Client logos 🟡
+Five signed logo permissions (BAMAH, LGBTech, bananaz, WINN.AI, Abe's Market).
+Files into `/public/images/logos/`, then set `logo` on those entries.
+
+### M3. Three copy calls 🟡 · ~15 min
+See Phase C above — the Einstein quote swap, the `heroTagline` inconsistency, and the
+digital-design principles rewrite. All drafted, needs Shai to pick.
+
+### M4. Venn diagram ⚪ · separate session
+Phase F. Recommendation stands: Direction 1, scroll-driven convergence, 4–6h.
+
+### Done ✅
+- ~~Fabricated About content~~ — timeline, Toronto, team-of-4, $15K pricing all removed
+- ~~Placeholder testimonials~~ — 5 real ones live
+- ~~Lorem ipsum principles intro~~ — `principlesIntro` per service
+- ~~"Principles of the Websites."~~ — `principlesLabel` field
+- ~~About-me section~~ — Tone C, section 6
+- ~~Orphaned headings at 375px~~ — zero across 375/768/1440
+
+---
+
 ## Time budget
 
 | Phase | Time | Tier |
