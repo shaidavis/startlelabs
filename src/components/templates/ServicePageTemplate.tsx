@@ -611,12 +611,10 @@ export function ServicePageTemplate({ service }: Props) {
         <div className="relative z-10">
           <div className="max-w-2xl mb-16 mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline leading-tight text-white mb-4">
-              Principles of the {service.title === "Pitch Decks" ? "Pitch" : service.title}.
+              Principles of the {service.principlesLabel ?? service.title}.
             </h2>
             <p className="text-white/80 leading-relaxed">
-              {/* TODO: replace with real principles intro copy */}
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              Suspendisse varius enim in eros elementum tristique.
+              {service.principlesIntro}
             </p>
           </div>
 
@@ -858,9 +856,12 @@ function ProjectsCarousel({ testimonials, accent, pageBg }: CarouselProps) {
                     {active.quote}
                   </blockquote>
                 )}
-                <footer className="mt-6 text-xs uppercase tracking-widest opacity-60">
-                  Placeholder Name, Role · {active.client}
-                </footer>
+                {active.author && (
+                  <footer className="mt-6 text-xs uppercase tracking-widest opacity-60">
+                    {active.author}
+                    {active.role ? `, ${active.role}` : ""} · {active.client}
+                  </footer>
+                )}
               </div>
             </motion.figure>
           </AnimatePresence>

@@ -21,10 +21,17 @@ export interface Deliverable {
 export interface TestimonialEntry {
   /** Client/company name, e.g. "Fiverr" */
   client: string;
-  /** Optional long-form quote. Placeholder until approved copy lands. */
+  /** Approved quote. Omit for portfolio samples that carry no testimonial. */
   quote?: string;
   /** Optional logo path */
   logo?: string;
+  /** Quote author. Omit alongside `quote` for sample-only entries. */
+  author?: string;
+  /**
+   * Author's job title only, e.g. "Executive Director" — the template appends
+   * `client` after it, so repeating the company here reads as a duplicate.
+   */
+  role?: string;
 }
 
 export interface Principle {
@@ -83,6 +90,14 @@ export interface Service {
   testimonials: TestimonialEntry[];
   /** Core principles — 6 items, numbered */
   principles: Principle[];
+  /**
+   * Noun used in the "Principles of the ___." heading. `title` reads wrong
+   * there ("the Websites", "the Pitch Decks"), so each service names its own
+   * singular form. Falls back to `title`.
+   */
+  principlesLabel?: string;
+  /** One-line intro above the principles grid. */
+  principlesIntro: string;
   /** CTA on the homepage card and at the bottom of the detail page */
   cta: { text: string; href: string };
   /** Slugs of the other 2 services to cross-sell at the bottom */
@@ -98,10 +113,6 @@ export interface Service {
   /** Copy for the closing CTA ("Curiosity piqued?" pattern). */
   closingCta: { title: string; body: string; button: string };
 }
-
-/* ─── Shared placeholders ─────────────────────────────────────────────── */
-
-const PLACEHOLDER_QUOTE = "Placeholder testimonial — real copy coming soon.";
 
 /* ─── Services ────────────────────────────────────────────────────────── */
 
@@ -140,10 +151,25 @@ export const services: Record<string, Service> = {
       { name: "Storyboards", icon: "/images/icons/wireframes.png" },
     ],
     testimonials: [
-      { client: "Clalit", quote: PLACEHOLDER_QUOTE },
-      { client: "Corpora", quote: PLACEHOLDER_QUOTE },
-      { client: "PointFive", quote: PLACEHOLDER_QUOTE },
+      {
+        client: "LGBTech",
+        author: "Shachar Grembek",
+        role: "Chair",
+        quote:
+          "Shai's unique ability to combine creativity with a structured, methodical approach has truly stood out. His thoroughness in asking deep, context-driven questions ensured the end results were not only visually impressive but strategically aligned with our goals.",
+      },
+      {
+        client: "WINN.AI",
+        author: "Oren Hacohen",
+        role: "Head of Growth",
+        quote:
+          "I've worked with Shai on brand building and creating the website of winn.ai from scratch. Shai had both great ideas and a very professional attitude. I couldn't be happier with the outcome.",
+      },
+      { client: "Clalit" },
+      { client: "PointFive" },
     ],
+    principlesIntro:
+      "Six things every brand we build has to earn before it ships.",
     principles: [
       {
         title: "Memorability",
@@ -187,7 +213,7 @@ export const services: Record<string, Service> = {
     ctaArt: "/images/icons/branding.png",
     closingCta: {
       title: "Confidence building?",
-      body: "Placeholder body — real closing copy coming soon.",
+      body: "Let's find the version of your brand that walks into the room like it belongs there. The first conversation is free, and usually clarifying.",
       button: "Let's Connect",
     },
   },
@@ -223,11 +249,26 @@ export const services: Record<string, Service> = {
       { name: "Infographics", icon: "/images/icons/chart.png" },
     ],
     testimonials: [
-      { client: "Bananaz", quote: PLACEHOLDER_QUOTE },
-      { client: "Naboo", quote: PLACEHOLDER_QUOTE },
-      { client: "Tastewise", quote: PLACEHOLDER_QUOTE },
-      { client: "SodaStream", quote: PLACEHOLDER_QUOTE },
+      {
+        client: "bananaz",
+        author: "Or Israel",
+        role: "CEO",
+        quote:
+          "Shai quickly understood our vision, making adjustments on the fly and delivering content that not only aided in securing key investments but also elevated our branding. He felt like a true teammate throughout.",
+      },
+      {
+        client: "Abe's Market",
+        author: "Richard Demb",
+        role: "Founder",
+        quote:
+          "My hesitation with recommending Shai is I want to be sure he still has time for my companies. I've worked with him over the past 10 years and he has consistently impressed me with how he can transform a conversation into a standout written and visual presentation.",
+      },
+      { client: "Tastewise" },
+      { client: "SodaStream" },
     ],
+    principlesLabel: "Pitch",
+    principlesIntro:
+      "What separates a deck that gets a second meeting from one that gets a polite no.",
     principles: [
       {
         title: "Narrative Flow",
@@ -271,7 +312,7 @@ export const services: Record<string, Service> = {
     ctaArt: "/images/icons/presentations-new.png",
     closingCta: {
       title: "Curiosity piqued?",
-      body: "Placeholder body — real closing copy coming soon.",
+      body: "Bring the deck you've got, or the idea you haven't built yet. Either way you'll leave the first call with a sharper story than you came in with.",
       button: "Let's Connect",
     },
   },
@@ -308,10 +349,19 @@ export const services: Record<string, Service> = {
       { name: "Wireframes", icon: "/images/icons/mockup.png" },
     ],
     testimonials: [
-      { client: "Bamah", quote: PLACEHOLDER_QUOTE },
-      { client: "Fiverr", quote: PLACEHOLDER_QUOTE },
-      { client: "R2", quote: PLACEHOLDER_QUOTE },
+      {
+        client: "BAMAH",
+        author: "Flo Low",
+        role: "Executive Director",
+        quote:
+          "Shai is the first person I want to collaborate with — his strategic mind and keen sense of visual design mean he's always thinking ahead on how to capture a brand's essence. Thanks to Shai, BAMAH not only has a beautiful website, we have a clearer understanding of how to talk about what we do.",
+      },
+      { client: "Fiverr" },
+      { client: "Corpora" },
     ],
+    principlesLabel: "Website",
+    principlesIntro:
+      "The non-negotiables behind every site we put our name on.",
     principles: [
       {
         title: "User-Centric Design",
@@ -355,7 +405,7 @@ export const services: Record<string, Service> = {
     // ctaArt: TODO — export reversed Websites hero artwork from Figma
     closingCta: {
       title: "Ready to connect?",
-      body: "Placeholder body — real closing copy coming soon.",
+      body: "Tell us who you're trying to reach and what you want them to feel. We'll show you what that looks like as a site people actually stay on.",
       button: "Let's Connect",
     },
   },
