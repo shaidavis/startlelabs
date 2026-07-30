@@ -25,6 +25,16 @@ export interface TestimonialEntry {
   quote?: string;
   /** Optional logo path */
   logo?: string;
+  /**
+   * Work screenshot shown inside the yellow scribble frame. Portrait crop,
+   * min 640×804 (2× the render box). Falls back to the empty frame.
+   */
+  image?: string;
+  /**
+   * One or two lines on what the work actually was. Renders with or without a
+   * quote — it's what makes a sample-only card worth showing.
+   */
+  blurb?: string;
   /** Quote author. Omit alongside `quote` for sample-only entries. */
   author?: string;
   /**

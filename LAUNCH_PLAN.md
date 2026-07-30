@@ -608,6 +608,22 @@ already there waiting), and render `blurb` under `client` above the quote.
 **Asset spec for screenshots:** portrait-ish crops, min 640×804 (2× the 320×402 render
 box), `.webp` or `.png`, into `/public/images/work/<client>.webp`.
 
+### M1b. Add missing projects to the Notion portfolio 🟡
+
+The Notion database is the source of truth for what's real on this site — it's what the
+`/about` portfolio embed shows, and what I checked service testimonials against. Several
+real projects aren't in it yet:
+
+- [ ] **Israel Healthcare Foundation**
+- [ ] **ACT Security**
+- [ ] **R2** — currently referenced by nothing; was dropped from services.ts
+- [ ] **Naboo** — same
+- [ ] …others Shai has in mind — list them here as they come up
+
+For each, the Notion row needs the same shape as the existing 30: project title, service
+tags (`brand messaging`, `investor deck`, `website`, …), and a URL. Anything added here
+becomes eligible for a Selected Projects card under M1.
+
 ### M2. Client logos 🟡
 Five signed logo permissions (BAMAH, LGBTech, bananaz, WINN.AI, Abe's Market).
 Files into `/public/images/logos/`, then set `logo` on those entries.

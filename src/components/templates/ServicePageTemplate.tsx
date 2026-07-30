@@ -832,15 +832,23 @@ function ProjectsCarousel({ testimonials, accent, pageBg }: CarouselProps) {
               exit="exit"
               transition={{ x: { duration: 0.45, ease: [0.32, 0.72, 0, 1] }, opacity: { duration: 0.3 } }}
             >
-              {/* Yellow scribble frame — placeholder for real client imagery */}
+              {/* Work screenshot inside the yellow scribble frame. The frame
+                  sits ON TOP so its hand-drawn edge overlaps the crop; without
+                  an image it's an empty frame, same as before. */}
               <div className="relative aspect-[545/684] w-full max-w-[320px] mx-auto md:mx-0">
+                {active.image && (
+                  <img
+                    src={active.image}
+                    alt={`${active.client} — work sample`}
+                    className="absolute inset-[5%] w-[90%] h-[90%] object-cover"
+                  />
+                )}
                 <img
                   src="/images/backgrounds/yellow-frame.svg"
                   alt=""
                   aria-hidden
-                  className="absolute inset-0 w-full h-full"
+                  className="absolute inset-0 w-full h-full pointer-events-none"
                 />
-                {/* TODO: drop the actual client logo/hero here */}
               </div>
 
               {/* Quote block on the right */}
@@ -851,6 +859,11 @@ function ProjectsCarousel({ testimonials, accent, pageBg }: CarouselProps) {
                 >
                   {active.client}
                 </div>
+                {active.blurb && (
+                  <p className="text-sm sm:text-base leading-relaxed opacity-70 mb-5 max-w-xl">
+                    {active.blurb}
+                  </p>
+                )}
                 {active.quote && (
                   <blockquote className="text-lg leading-relaxed opacity-85 max-w-xl">
                     {active.quote}
