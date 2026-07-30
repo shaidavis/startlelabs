@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, type CSSProperties } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { services, type Service } from "@/data/services";
 import { TornEdge } from "@/components/ui/TornEdge";
 import { SectionBackground } from "@/components/ui/SectionBackground";
+import { grungeBackground } from "@/lib/texture";
 
 /**
  * Figma-exported section backgrounds. When a new section's SVG lands in
@@ -107,13 +108,6 @@ const CROSS_SELL_BANNERS: Record<string, { idle: string; hover: string }> = {
     idle: "/images/banners/Websites%20Idle.png",
     hover: "/images/banners/Websites%20Hover.png",
   },
-};
-
-const GRUNGE: CSSProperties = {
-  backgroundImage: "url(/images/backgrounds/HeroGrunge.png)",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundBlendMode: "overlay",
 };
 
 /**
@@ -435,7 +429,7 @@ export function ServicePageTemplate({ service }: Props) {
           // torn-edge strip (which extends above its own top into the
           // prior section's space) is automatically on top.
           className="relative px-8 sm:px-16 md:px-24 lg:px-32 pt-24 sm:pt-28 pb-24 sm:pb-28"
-          style={{ backgroundColor: STATS_BG, ...GRUNGE }}
+          style={grungeBackground(STATS_BG)}
         >
           <TornEdge
             color={STATS_BG}
@@ -569,7 +563,7 @@ export function ServicePageTemplate({ service }: Props) {
           the ACCENT→PAGE_BG tear). */}
       <section
         className="relative px-8 sm:px-16 md:px-24 lg:px-32 py-28 sm:py-32 overflow-visible"
-        style={{ backgroundColor: accent, color: "#ffffff", ...GRUNGE }}
+        style={{ ...grungeBackground(accent), color: "#ffffff" }}
       >
         <TornEdge
           color={accent}
@@ -656,7 +650,7 @@ export function ServicePageTemplate({ service }: Props) {
           the earlier polygon-with-transparent-strips approach. */}
       <section
         className="relative px-8 sm:px-16 md:px-24 lg:px-32 py-24 pb-40"
-        style={{ backgroundColor: accent, color: "#ffffff", ...GRUNGE }}
+        style={{ ...grungeBackground(accent), color: "#ffffff" }}
       >
         <TornEdge
           color={accent}

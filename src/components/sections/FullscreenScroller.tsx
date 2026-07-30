@@ -12,6 +12,7 @@ import type { Service } from "@/data/services";
 import { RadiatingBolts } from "@/components/effects/RadiatingBolts";
 import { InteractiveVennCanvas } from "@/components/about/InteractiveVennCanvas";
 import { HERO_EXTRA_VH, HERO_COLLAPSE_VH, HERO_RESOLVE_PORTION } from "./heroTiming";
+import { grungeBackground } from "@/lib/texture";
 
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
@@ -25,29 +26,13 @@ interface ScrollSectionData {
 }
 
 /**
- * Grunge-overlay background helper. Every full-screen hero panel gets a
- * shared distressed-paper texture composited over its accent color so the
- * bold colors read as a "weathered silkscreen poster" rather than flat
- * digital fill.
- *
- * `multiply` blend was picked over `overlay`/`soft-light` because the
- * texture PNG sits in the mid-gray range — under `overlay` mid-gray is
- * neutral, which left the result indistinguishable from a flat fill in
- * tests. Multiply makes the gray patches darken the underlying color
- * ~30–50%, giving the visible "dirty/printed" cast the user asked for
- * while keeping highlights (the lighter speckles in the PNG) bright.
- *
- * Blend-mode targets the bg layers only, so panel CONTENT (headlines,
- * CTAs, illustrations) renders cleanly above the texture — no readability
- * hit. Returns a `style` object so callers can spread or pass directly.
+ * Homepage panels use the site-wide texture — see `grungeBackground` and the
+ * `TEXTURE` control in `@/lib/texture`. `GRUNGE_BG` is a thin local alias kept
+ * so the call sites below read unchanged; it just forwards to the shared
+ * helper (the `seed` arg nudges the crop for panels sharing an accent color).
  */
-const GRUNGE_BG = (color: string): React.CSSProperties => ({
-  backgroundColor: color,
-  backgroundImage: "url(/images/backgrounds/HeroGrunge.png)",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundBlendMode: "hard-light",
-});
+const GRUNGE_BG = (color: string, seed = 0): React.CSSProperties =>
+  grungeBackground(color, { seed, pngBlend: "hard-light" });
 
 /* ─── Scroll-driven content animation ──────────────────────────────── */
 
@@ -732,7 +717,7 @@ function ContactPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
   return (
     <div
       className="absolute inset-0 flex flex-col px-8 sm:px-16 md:px-24 lg:px-32 pt-24 sm:pt-32 pb-8 sm:pb-10"
-      style={GRUNGE_BG("#E9C402")}
+      style={GRUNGE_BG("#E9C402", 3)}
     >
       {/* Main copy — flex-1 + items-center vertically centres this block in
           the remaining space above the footer row, keeping the Yalla.

@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { TornEdge } from "@/components/ui/TornEdge";
 import { RadiatingBolts } from "@/components/effects/RadiatingBolts";
+import { grungeBackground } from "@/lib/texture";
 
 // 8 bolts evenly spaced — fewer than the hero's 12 to suit the small icon.
 const HEART_BOLTS = (() => {
@@ -47,14 +48,7 @@ export function Footer() {
   return (
       <footer
         className="relative py-12 px-8 sm:px-16 md:px-24 lg:px-32"
-        style={{
-          backgroundColor: "#e9c402",
-          color: "#230F2C",
-          backgroundImage: "url(/images/backgrounds/HeroGrunge.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundBlendMode: "overlay",
-        }}
+        style={{ ...grungeBackground("#e9c402"), color: "#230F2C" }}
       >
         <TornEdge
           color="#e9c402"

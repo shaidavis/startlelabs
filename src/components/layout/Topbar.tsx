@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Navigation } from "./Navigation";
 import { SectionNav } from "./SectionNav";
+import { grungeBackground } from "@/lib/texture";
 import { services } from "@/data/services";
 import {
   HERO_EXTRA_VH,
@@ -211,13 +212,7 @@ export function Topbar() {
         className={`fixed top-0 left-0 right-0 z-50 overflow-visible transition-[height,background-color] duration-300 ease-out ${
           collapsed ? "h-[6px]" : "h-[64px] sm:h-[76px]"
         }`}
-        style={barBg ? {
-          backgroundColor: barBg,
-          backgroundImage: "url(/images/backgrounds/HeroGrunge.png)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundBlendMode: "overlay",
-        } : undefined}
+        style={barBg ? grungeBackground(barBg) : undefined}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}

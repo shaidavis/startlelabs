@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -8,13 +8,7 @@ import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { TornEdge } from "@/components/ui/TornEdge";
 import { PageTransition } from "@/components/layout/PageTransition";
 import type { AboutData, Review } from "@/data/about";
-
-const GRUNGE: CSSProperties = {
-  backgroundImage: "url(/images/backgrounds/HeroGrunge.png)",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundBlendMode: "overlay",
-};
+import { grungeBackground } from "@/lib/texture";
 
 // ─── Color theme ────────────────────────────────────────────────
 // Orange accent replaces the yellow we had. Pairs with the deep
@@ -65,7 +59,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
         {/* ─── 1. Hero (ORANGE) — founder image + intro ─────── */}
         <section
           className="relative pt-32 sm:pt-36 pb-36 sm:pb-44 px-8 sm:px-16 md:px-24 lg:px-32 overflow-hidden"
-          style={{ backgroundColor: ORANGE, color: INK, ...GRUNGE }}
+          style={{ ...grungeBackground(ORANGE), color: INK }}
         >
           <div className="relative z-10 max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-12">
             <motion.div
@@ -110,7 +104,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
         {/* ─── 2. Reviews (3-column vertical marquee) ───────── */}
         <section
           className="relative pt-24 sm:pt-28 pb-24 sm:pb-28"
-          style={{ backgroundColor: STATS_BG, ...GRUNGE }}
+          style={grungeBackground(STATS_BG)}
         >
           <TornEdge
             color={STATS_BG}
@@ -248,7 +242,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
         {/* ─── 5. Manifesto (ORANGE mid-page accent) ──────── */}
         <section
           className="relative px-8 sm:px-16 md:px-24 lg:px-32 pt-24 sm:pt-28 pb-24 sm:pb-28"
-          style={{ backgroundColor: ORANGE, color: INK, ...GRUNGE }}
+          style={{ ...grungeBackground(ORANGE), color: INK }}
         >
           <TornEdge
             color={ORANGE}
@@ -419,7 +413,7 @@ export function AboutTemplate({ data }: { data: AboutData }) {
         {/* ─── 9. Closing CTA (ORANGE) ──────────────────── */}
         <section
           className="relative px-8 sm:px-16 md:px-24 lg:px-32 pt-32 sm:pt-36 pb-32 sm:pb-36"
-          style={{ backgroundColor: ORANGE, color: INK, ...GRUNGE }}
+          style={{ ...grungeBackground(ORANGE), color: INK }}
         >
           <TornEdge
             color={ORANGE}
