@@ -371,6 +371,8 @@ export function AboutTemplate({ data }: { data: AboutData }) {
                 {data.portfolio.body}
               </p>
             </div>
+            {/* Link-out card, NOT an embed — Notion's embed runtime crashes
+                the renderer on Safari/iOS (see AboutData.portfolio.notionUrl). */}
             <motion.div
               className="rounded-2xl overflow-hidden border"
               style={{ borderColor: "#eceaf5", background: PAGE_BG }}
@@ -379,15 +381,33 @@ export function AboutTemplate({ data }: { data: AboutData }) {
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.6 }}
             >
-              <iframe
-                src={data.portfolio.notionEmbedUrl}
-                width="100%"
-                height="600"
-                frameBorder="0"
-                allowFullScreen
-                title="Startle Labs portfolio"
-                className="block w-full"
-              />
+              <a
+                href={data.portfolio.notionUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between gap-6 p-8 sm:p-10"
+              >
+                <div>
+                  <span
+                    className="font-headline text-xl sm:text-2xl"
+                    style={{ color: INK }}
+                  >
+                    {data.portfolio.linkLabel}
+                  </span>
+                  <p className="mt-1 text-sm text-neutral-500">
+                    Opens in Notion — selected projects, tagged by service.
+                  </p>
+                </div>
+                <span
+                  aria-hidden
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
+                  style={{ backgroundColor: ORANGE, color: "#fff" }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 12L12 4M12 4H6M12 4v6" />
+                  </svg>
+                </span>
+              </a>
             </motion.div>
           </div>
         </section>

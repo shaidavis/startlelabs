@@ -50,8 +50,10 @@ or `.png`, into `/public/images/work/<client>.webp`.
 
 ### M1b. Add missing projects to the Notion portfolio 🟡
 
-Notion is the source of truth for what's real on this site — it feeds the `/about`
-portfolio embed and it's what service testimonials get checked against.
+Notion is the source of truth for what's real on this site — the `/about` portfolio
+card links out to it, and it's what service testimonials get checked against. (It was
+an inline embed until 2026-07-31: Notion's embed runtime crashes Safari/iOS renderers,
+so it must stay a link-out.)
 
 - [ ] **Israel Healthcare Foundation**
 - [ ] **ACT Security**

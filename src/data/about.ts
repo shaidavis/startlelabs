@@ -57,7 +57,16 @@ export interface AboutData {
   portfolio: {
     heading: string;
     body: string;
-    notionEmbedUrl: string;
+    /**
+     * Public Notion share URL, opened in a new tab. Deliberately NOT embedded:
+     * Notion's embed runtime gets its cookies blocked by WebKit's tracking
+     * prevention, spins in an auth-retry loop, and crashes the whole page's
+     * renderer process on Safari and every iOS browser. Do not turn this back
+     * into an <iframe>.
+     */
+    notionUrl: string;
+    /** CTA label on the link-out card. */
+    linkLabel: string;
   };
   faqs: FAQ[];
   cta: {
@@ -472,8 +481,9 @@ export const aboutData: AboutData = {
   portfolio: {
     heading: "Work we've shipped",
     body: "A living archive of the brands we've helped build, rebuild, and sharpen. Browse recent work and filter by industry, service, or year.",
-    notionEmbedUrl:
-      "https://shaidavis.notion.site/ebd/a3b1ac214a534a3c993ea8248ec151a9?v=30f304d338d2457bba8ba2eb6ad6656c",
+    notionUrl:
+      "https://shaidavis.notion.site/a3b1ac214a534a3c993ea8248ec151a9?v=30f304d338d2457bba8ba2eb6ad6656c",
+    linkLabel: "Browse the full portfolio",
   },
   faqs: [
     {
