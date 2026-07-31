@@ -67,10 +67,7 @@ export function Topbar() {
   // 220ms timer; when that timer finally fires without interruption, the
   // user is considered "at rest" and the bar expands.
   useEffect(() => {
-    if (!onServicesPage && !onAboutPage) {
-      setIsScrolling(false);
-      return;
-    }
+    if (!onServicesPage && !onAboutPage) return;
     let timer: number | undefined;
     const handleScroll = () => {
       // setState with same value bails out in React, so this doesn't
@@ -83,6 +80,10 @@ export function Topbar() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.clearTimeout(timer);
+      // Leaving the collapsible context (route change or unmount): expand the
+      // bar again, so navigating away mid-scroll can't strand isScrolling=true
+      // and greet the next services/about visit with a pre-collapsed bar.
+      setIsScrolling(false);
     };
   }, [onServicesPage, onAboutPage]);
 

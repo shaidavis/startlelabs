@@ -1,6 +1,13 @@
 "use client";
 
-import { useRef, useEffect, useLayoutEffect, useState, useCallback } from "react";
+import {
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useCallback,
+  useSyncExternalStore,
+} from "react";
 import {
   motion,
   useScroll,
@@ -102,6 +109,17 @@ interface PanelProps {
 // the same cycle in reverse, frame-for-frame.
 const SCROLL_WORDS = ["teams", "users", "investors", "vision", "innovation", "joy", "success"];
 
+// Below-sm (810px) media query, exposed as an external store for
+// useSyncExternalStore — matchMedia is browser state React doesn't own.
+const MOBILE_QUERY = "(max-width: 809px)";
+const subscribeToMobileQuery = (onChange: () => void) => {
+  const mq = window.matchMedia(MOBILE_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+};
+const getIsMobile = () => window.matchMedia(MOBILE_QUERY).matches;
+const getServerIsMobile = () => false;
+
 function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
   const rowRef = useRef<HTMLDivElement>(null);
   const wheelRef = useRef<HTMLDivElement>(null);
@@ -110,7 +128,16 @@ function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
   const inlinePeriodRef = useRef<HTMLSpanElement>(null); // mobile: fades in
   const [wordHeight, setWordHeight] = useState(56);
   const [maxWordWidth, setMaxWordWidth] = useState(200);
-  const [isMobile, setIsMobile] = useState(false);
+  // Mobile detection (below sm breakpoint = 810px), read via
+  // useSyncExternalStore. The server snapshot is `false`, so SSR markup and
+  // the hydration pass both render the desktop branch; on a mobile viewport
+  // React swaps in the mobile layout right after hydration, when the client
+  // snapshot disagrees. Later viewport changes re-render synchronously.
+  const isMobile = useSyncExternalStore(
+    subscribeToMobileQuery,
+    getIsMobile,
+    getServerIsMobile
+  );
 
   // Three-phase hero timeline, expressed in units of a normal section span:
   //   word cycling (HERO_EXTRA_VH) → resolve/collapse (HERO_COLLAPSE_VH) → slide-out (1)
@@ -133,18 +160,6 @@ function HeroPanel({ scrollYProgress, snapPoint, sectionSpan }: PanelProps) {
   const collapseSpan = normalSpanHero * HERO_COLLAPSE_VH;
   const cycleEnd = snapPoint + cycleSpan;
   const collapseEnd = cycleEnd + collapseSpan;
-
-  // Detect mobile (below sm breakpoint = 810px). useLayoutEffect so the
-  // detection commits before paint — otherwise on mobile, the user briefly
-  // sees the desktop branch (rendered with the SSR-default isMobile=false)
-  // before React swaps in the mobile layout.
-  useLayoutEffect(() => {
-    const mq = window.matchMedia("(max-width: 809px)");
-    setIsMobile(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
 
   // Row slide-out: fully in place through cycle + resolve, then flies off
   // to the left once the user scrolls past the end of the resolve phase.
