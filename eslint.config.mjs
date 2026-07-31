@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Parallel Claude sessions keep git worktrees (each with its own .next
+    // build output) under .claude/worktrees — never lint them.
+    ".claude/worktrees/**",
   ]),
 ]);
 
