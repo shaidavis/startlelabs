@@ -69,7 +69,7 @@ const BLOBS: Blob[] = [
 ];
 
 const CENTER: [number, number] = [280, 250];
-const STAR_COLOR = "#FFE000";
+const STAR_COLOR = "#FFFFFF";
 const CREATIVITY_AT = 3000;
 
 // pairwise lenses — write in last, one at a time (Leadership, Artistry, Empathy)
@@ -172,9 +172,19 @@ export function InteractiveVennCanvas({ chrome = true, caption = true, replayNon
     const prefersReduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setReduce(prefersReduce);
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    ctx.scale(dpr, dpr);
+    // Backing store tracks the displayed size (which can exceed the logical
+    // W×H grid) so the bitmap stays crisp; drawing stays in logical coords.
+    // Re-checked every frame — a one-off mount measurement can catch the
+    // wrapper mid-hydration (or pre-resize) and bake in a blurry bitmap.
+    const sizeToDisplay = () => {
+      const px = ((canvas.clientWidth || W) / W) * dpr;
+      const bw = Math.round(W * px);
+      if (canvas.width === bw) return;
+      canvas.width = bw;
+      canvas.height = Math.round(H * px);
+      ctx.setTransform(px, 0, 0, px, 0, 0);
+    };
+    sizeToDisplay();
     ctx.clearRect(0, 0, W, H);
 
     // Hold everything hidden until the panel is active (scrolled into view).
@@ -225,6 +235,7 @@ export function InteractiveVennCanvas({ chrome = true, caption = true, replayNon
     const frame = (now: number) => {
       if (start == null) start = now;
       animT = now - start;
+      sizeToDisplay();
       ctx.clearRect(0, 0, W, H);
       ctx.globalCompositeOperation = "source-over";
 
@@ -398,7 +409,7 @@ export function InteractiveVennCanvas({ chrome = true, caption = true, replayNon
   return (
     <div className="flex flex-col items-center">
       {chrome && (
-        <div className="mb-3 flex w-full max-w-[560px] items-center justify-between gap-3">
+        <div className="mb-3 flex w-full max-w-[660px] items-center justify-between gap-3">
           <span className="text-sm" style={{ color: `${INK}80` }}>Hover, tap, or Tab through the blobs, the overlaps, and the centre</span>
           <button
             type="button"
@@ -411,7 +422,7 @@ export function InteractiveVennCanvas({ chrome = true, caption = true, replayNon
         </div>
       )}
 
-      <div ref={wrapRef} className="relative w-full max-w-[560px]" style={{ aspectRatio: `${W} / ${H}` }}>
+      <div ref={wrapRef} className="relative w-full max-w-[660px]" style={{ aspectRatio: `${W} / ${H}` }}>
         <canvas
           ref={canvasRef}
           className="block h-full w-full cursor-crosshair"
