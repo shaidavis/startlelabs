@@ -48,12 +48,12 @@ interface NamingSample {
 ## Steps
 
 - [x] Survey sources, extract corpus, slice, brief helpers
-- [ ] Helpers return ~100 candidates + ~30 taglines → I shortlist ~70 → Shai trims to 50
+- [x] Helpers returned 90 candidates + 33 taglines → shortlisted 58 (+13 reserves) → Shai to strike/swap
 - [x] Scaffold: data types, font pairings, scenes, NamingWall, `/naming` route (placeholders)
-- [ ] Fill `naming.ts` with the 50 picks; write missing taglines in the report's voice
-- [ ] Assign pairing + scene + palette per card for visual range
-- [ ] Visual pass 375 / 768 / 1440, console clean, tsc + lint
-- [ ] Commit, push
+- [x] Fill `naming.ts` with the 58 picks; 12 taglines kept from reports, 46 written for the wall
+- [x] Assign pairing + scene + palette per card for visual range
+- [x] Visual pass 375 / 768 / 1440, console clean, tsc + lint (2026-10-09)
+- [x] Commit, push, merge to main
 
 ## Backlog (outside "done" — needs Shai's yes)
 
