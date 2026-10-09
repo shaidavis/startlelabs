@@ -143,7 +143,7 @@ export const services: Record<string, Service> = {
     accentText: "#047D65",
     deliverablesBg: "#203C2B",
     heroIntro:
-      "You have a story to tell. Is your audience interested in hearing it? You don't need to be noisy to be noticed. If we start with a meaningful story, we'll end with a memorable brand.",
+      "You have a story to tell. Your audience needs a reason to care. You don't need to be noisy to be noticed. If we start with a meaningful story, we'll end with a memorable brand.",
     stats: [
       { label: "Companies Named", value: "192" },
       { label: "Taglines Written", value: "2,148" },
@@ -181,7 +181,7 @@ export const services: Record<string, Service> = {
       { client: "PointFive" },
     ],
     principlesLabel: "Brand",
-    principlesIntro: "Six questions I ask on every brand build:",
+    principlesIntro: "Six questions I ask on every brand build",
     principles: [
       {
         title: "Is it sticky?",
@@ -323,17 +323,17 @@ export const services: Record<string, Service> = {
     headline: "Websites,\nart direction,\nand product",
     description: "connection",
     navTitle: "Websites, Art direction, and Product",
-    heroTagline: "Web perfect.",
+    heroTagline: "Site specific.",
     heroImage: "/images/icons/artdirection.png",
     accentColor: "#F84267",
     accentText: "#C83553",
     deliverablesBg: "#6A0000",
     heroIntro:
-      "Your website is where your brand builds meaningful connections. It's more than just a digital presence—it's a space where your audience should feel immediately at home. When done right, your website creates a lasting bond, making visitors feel like they've found what they've been looking for, fostering engagement, loyalty, and trust.",
+      "You have a funnel. Your visitors have twenty other tabs open. People stay on a site that gets them. Let's build one that makes a real connection.",
     stats: [
       { label: "First Site Built", value: "in 1999" },
       { label: "Tools Used", value: "Dozens" },
-      { label: "Pixels Perfected", value: "All the Pixels" },
+      { label: "Pixels Perfected", value: "ALL THE PIXELS" },
     ],
     quote: {
       text: "Connection isn't a skill. It's a choice.",
@@ -359,44 +359,37 @@ export const services: Record<string, Service> = {
       { client: "Corpora" },
     ],
     principlesLabel: "Website",
-    principlesIntro:
-      "The non-negotiables behind every site we put our name on.",
+    principlesIntro: "Six questions I ask before any site goes live",
     principles: [
       {
-        title: "User-Centric Design",
-        tagline: "Your website should be built for the people using it, not just for show.",
+        title: "Is it intuitive?",
         description:
-          "We prioritize intuitive navigation and usability, ensuring visitors can find what they need effortlessly.",
+          "Can visitors find what they came for without thinking? Does it work the way they expect it to?",
       },
       {
-        title: "Speed & Performance",
-        tagline: "A slow website loses visitors—speed is key to keeping their attention.",
+        title: "Is it fast?",
         description:
-          "We focus on optimizing site performance to provide a seamless, fast experience that keeps users engaged.",
+          "Does it load before they reach for the back button? Does every page feel instant?",
       },
       {
-        title: "Mobile Responsiveness",
-        tagline: "Your website should look great and function perfectly on any device.",
+        title: "Is it responsive?",
         description:
-          "We ensure that your site is fully responsive, adapting to mobile, tablet, and desktop seamlessly.",
+          "Is it just as good on a phone as on a big screen? What about on a slow train?",
       },
       {
-        title: "SEO Optimization",
-        tagline: "What's the point of a great website if no one can find it?",
+        title: "Is it accessible?",
         description:
-          "We design websites that are not only beautiful but also optimized for search engines, ensuring visibility.",
+          "Can everyone use it, whatever their eyesight, device or connection?",
       },
       {
-        title: "Conversion-Driven",
-        tagline: "A website's ultimate goal is to convert visitors into customers.",
+        title: "Does it convert?",
         description:
-          "We strategically design websites that guide users toward taking action—whether it's making a purchase, signing up, or reaching out.",
+          "Does every page have a next step? Is it the one you want them to take?",
       },
       {
-        title: "Security & Stability",
-        tagline: "Trust is built on a secure and stable website that keeps data safe.",
+        title: "Is it measurable?",
         description:
-          "We implement the highest security standards, protecting both your business and your visitors, ensuring peace of mind.",
+          "Do you know what visitors do once they land? Can you tell which pages are earning their keep?",
       },
     ],
     cta: { text: "Explore Websites", href: "/services/digital-design" },
@@ -404,7 +397,7 @@ export const services: Record<string, Service> = {
     // ctaArt: TODO — export reversed Websites hero artwork from Figma
     closingCta: {
       title: "Ready to connect?",
-      body: "Tell us who you're trying to reach and what you want them to feel. We'll show you what that looks like as a site people actually stay on.",
+      body: "Tell me who you want to reach and how you want them to feel, and let's build a site that'll make them click.",
       button: "Let's Connect",
     },
   },

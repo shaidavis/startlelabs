@@ -610,7 +610,7 @@ export function ServicePageTemplate({ service }: Props) {
         />
         <div className="relative z-10">
           <div className="max-w-2xl mb-16 mx-auto text-center">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline leading-tight text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline leading-tight text-white mb-4 text-balance">
               Principles of the {service.principlesLabel ?? service.title}
             </h2>
             <p className="text-white/80 leading-relaxed text-balance">
