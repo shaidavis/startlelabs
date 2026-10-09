@@ -707,7 +707,10 @@ export function ServicePageTemplate({ service }: Props) {
           <p className="text-center font-handwritten text-xl sm:text-2xl md:text-3xl mb-10">
             Other services from Startle Labs
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+          {/* items-start: the banners differ slightly in aspect, and a
+              stretched card would run past its image (the scrim and hover
+              art are pinned to the card box). */}
+          <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-6 max-w-6xl mx-auto">
             {related.map((r) => {
               const banner = CROSS_SELL_BANNERS[r.slug];
               if (!banner) return null;
@@ -741,13 +744,21 @@ export function ServicePageTemplate({ service }: Props) {
                   {/* Soft ink scrim behind the text zone — the white title
                       alone reaches only ~3.5:1 on the flat accent areas of
                       the banner art; this gradient lifts it past WCAG AA's
-                      4.5:1 while reading as gentle illustration shading. */}
+                      4.5:1 while reading as gentle illustration shading.
+                      Masked by the banner's own alpha so it only darkens the
+                      art — unmasked, it shaded the transparent margin outside
+                      the torn edge as grey wedges. Idle and hover PNGs share
+                      dimensions, so one mask fits both. */}
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute inset-y-0 right-0 w-[60%]"
+                    className="pointer-events-none absolute inset-0"
                     style={{
                       background:
-                        "linear-gradient(to left, rgba(35,15,44,0.32) 55%, rgba(35,15,44,0))",
+                        "linear-gradient(to left, rgba(35,15,44,0.32) 33%, rgba(35,15,44,0) 60%)",
+                      maskImage: `url("${banner.idle + BANNER_V}")`,
+                      maskSize: "100% 100%",
+                      WebkitMaskImage: `url("${banner.idle + BANNER_V}")`,
+                      WebkitMaskSize: "100% 100%",
                     }}
                   />
                   {/* Text + squiggle arrow overlay, anchored to the right
