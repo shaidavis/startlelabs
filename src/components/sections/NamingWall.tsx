@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { PAIRINGS } from "@/app/naming/fonts";
@@ -39,8 +39,37 @@ export function NamingWall({ samples }: { samples: NamingSample[] }) {
   );
 }
 
+/**
+ * Shrinks the name's font-size just enough to keep it on one line. The display
+ * faces range from Bebas-narrow to Syne-wide, so a length-based size tier
+ * can't guarantee a fit; measuring can. Re-runs when the card resizes and
+ * once the web font has actually loaded (they're `display: swap`).
+ */
+function useFitOneLine(ref: RefObject<HTMLElement | null>) {
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      el.style.fontSize = "";
+      const base = parseFloat(getComputedStyle(el).fontSize);
+      const { scrollWidth, clientWidth } = el;
+      if (scrollWidth > clientWidth) {
+        el.style.fontSize = `${Math.floor(base * (clientWidth / scrollWidth) * 98) / 100}px`;
+      }
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    if (el.parentElement) ro.observe(el.parentElement);
+    document.fonts?.ready.then(fit);
+    return () => ro.disconnect();
+  }, [ref]);
+}
+
 function NameCard({ sample }: { sample: NamingSample }) {
   const [flipped, setFlipped] = useState(false);
+  const nameRef = useRef<HTMLHeadingElement>(null);
+  useFitOneLine(nameRef);
   const pairing = PAIRINGS[sample.pairing];
   const [base, accent] = sample.palette;
   const frontInk = readableOn(base);
@@ -77,8 +106,9 @@ function NameCard({ sample }: { sample: NamingSample }) {
           />
           <div className="relative">
             <h3
+              ref={nameRef}
               className={cn(
-                "leading-[0.95] text-balance mb-3",
+                "leading-[0.95] whitespace-nowrap mb-3",
                 sample.name.length > 14 ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl",
               )}
               style={{
