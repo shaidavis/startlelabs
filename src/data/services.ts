@@ -163,6 +163,7 @@ export const services: Record<string, Service> = {
     testimonials: [
       {
         client: "LGBTech",
+        image: "/images/work/lgbtech.jpg",
         author: "Shachar Grembek",
         role: "Chair",
         quote:

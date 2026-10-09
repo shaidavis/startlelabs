@@ -781,6 +781,11 @@ export function ServicePageTemplate({ service }: Props) {
    and shares styling tokens (PAGE_BG, accent) with the parent. If another
    page ever needs it, extract to components/ui/Carousel.tsx. */
 
+/** Outline of the hand-drawn yellow frame (545×684 box). Inlined rather than
+    loaded from an SVG file so the same shape can clip the work image. */
+const FRAME_PATH =
+  "M449.865 8.72812L92.1819 42.2168L44.2087 81.3655L8.58154 305.409L44.2087 598.789L207.177 674.728L464.68 643.598L504.187 554.452L535.582 383.707L504.187 42.2168L449.865 8.72812Z";
+
 interface CarouselProps {
   testimonials: Service["testimonials"];
   accent: string;
@@ -832,24 +837,31 @@ function ProjectsCarousel({ testimonials, accent, pageBg }: CarouselProps) {
               exit="exit"
               transition={{ x: { duration: 0.45, ease: [0.32, 0.72, 0, 1] }, opacity: { duration: 0.3 } }}
             >
-              {/* Work screenshot inside the yellow scribble frame. The frame
-                  sits ON TOP so its hand-drawn edge overlaps the crop; without
-                  an image it's an empty frame, same as before. */}
-              <div className="relative aspect-[545/684] w-full max-w-[320px] mx-auto md:mx-0">
+              {/* Work image clipped to the yellow scribble frame, with the
+                  stroke drawn ON TOP so its hand-drawn edge overlaps the crop.
+                  Without an image it's the empty white frame. */}
+              <svg
+                viewBox="0 0 545 684"
+                className="aspect-[545/684] w-full max-w-[320px] mx-auto md:mx-0"
+                role={active.image ? "img" : undefined}
+                aria-label={active.image ? `${active.client} — work sample` : undefined}
+                aria-hidden={active.image ? undefined : true}
+              >
+                <clipPath id={`frame-clip-${activeIdx}`}>
+                  <path d={FRAME_PATH} />
+                </clipPath>
+                <path d={FRAME_PATH} fill="white" />
                 {active.image && (
-                  <img
-                    src={active.image}
-                    alt={`${active.client} — work sample`}
-                    className="absolute inset-[5%] w-[90%] h-[90%] object-cover"
+                  <image
+                    href={active.image}
+                    width="545"
+                    height="684"
+                    preserveAspectRatio="xMidYMid slice"
+                    clipPath={`url(#frame-clip-${activeIdx})`}
                   />
                 )}
-                <img
-                  src="/images/backgrounds/yellow-frame.svg"
-                  alt=""
-                  aria-hidden
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                />
-              </div>
+                <path d={FRAME_PATH} fill="none" stroke="#E9C402" strokeWidth="17" />
+              </svg>
 
               {/* Quote block on the right */}
               <div>
