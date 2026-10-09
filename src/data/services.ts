@@ -135,7 +135,7 @@ export const services: Record<string, Service> = {
     headline: "Creative strategy,\nbrand identity,\nand messaging",
     description: "confidence",
     navTitle: "Creative strategy, Brand identity, and Messaging",
-    heroTagline: "Branding & Creative Strategy",
+    heroTagline: "Meaningful confidence.",
     heroImage: "/images/icons/branding.png",
     // #05A787 (vs. the original #05AB8A) is darkened ~2% so white headline
     // text on this background clears WCAG AA's 3:1 large-text minimum.
@@ -181,7 +181,7 @@ export const services: Record<string, Service> = {
       { client: "PointFive" },
     ],
     principlesLabel: "Brand",
-    principlesIntro: "Six questions to ask when building a brand",
+    principlesIntro: "Six questions I ask on every brand build:",
     principles: [
       {
         title: "Is it sticky?",
@@ -236,7 +236,7 @@ export const services: Record<string, Service> = {
     accentColor: "#137FBF",
     accentText: "#1174AE",
     heroIntro:
-      "Your pitch deck isn't just about presenting facts—it's about sparking curiosity. You need to make your investors or audience lean in, asking for more. When your message is compelling and thought-provoking, it ignites curiosity, pushing them to want to explore your vision and become part of your journey. It's not just what you show; it's what they want to learn next.",
+      "You have a pitch. Your audience has a short attention span. What you don't put in the deck is just as important as what you do. Let's build a presentation that invites genuine curiosity.",
     stats: [
       { label: "Funds Raised", value: "Hundreds\nof Millions" },
       { label: "Slides Created", value: "At Least Ten\nThousand" },
@@ -273,44 +273,37 @@ export const services: Record<string, Service> = {
       { client: "SodaStream" },
     ],
     principlesLabel: "Pitch",
-    principlesIntro:
-      "What separates a deck that gets a second meeting from one that gets a polite no.",
+    principlesIntro: "Six questions I ask to make every deck sing",
     principles: [
       {
-        title: "Narrative Flow",
-        tagline: "A great presentation tells a compelling story, not just a sequence of slides.",
+        title: "Does it flow?",
         description:
-          "We ensure every pitch deck has a clear, engaging storyline that guides your audience effortlessly from start to finish.",
+          "Is there a story, or just a sequence of slides? Does each slide earn the next one?",
       },
       {
-        title: "Visual Clarity",
-        tagline: "Visuals should enhance your message, not distract from it.",
+        title: "Is it clear?",
         description:
-          "We prioritize clear, impactful design that supports your key points, ensuring investors focus on your message.",
+          "Can they get each slide in three seconds? Does the design carry your point, or compete with it?",
       },
       {
-        title: "Persuasion",
-        tagline: "Every slide should compel action or inspire confidence.",
+        title: "Is it persuasive?",
         description:
-          "We craft presentations that make investors eager to learn more, encouraging them to take the next step with you.",
+          "What do you want them to do when the lights come on? Does every slide move them toward it?",
       },
       {
-        title: "Brevity",
-        tagline: "Less is more—say enough to captivate, but leave them wanting more.",
+        title: "Is it concise?",
         description:
-          "We refine your message to its essentials, keeping the content concise yet powerful.",
+          "What can you cut? Are you leaving them wanting more, or wanting out?",
       },
       {
-        title: "Engagement",
-        tagline: "Investors should feel intrigued and involved, not just informed.",
+        title: "Is it engaging?",
         description:
-          "We create presentations that foster dialogue, encouraging curiosity and interaction from the audience.",
+          "Are they leaning in or checking their phones? What will they ask you afterwards?",
       },
       {
-        title: "Credibility",
-        tagline: "Your deck should make investors feel secure in your vision.",
+        title: "Is it credible?",
         description:
-          "We emphasize data, facts, and realistic projections that build trust and make investors confident in your business.",
+          "Do your numbers hold up? Will your projections survive the first hard question?",
       },
     ],
     cta: { text: "Explore Pitch Decks", href: "/services/creative-direction" },
@@ -318,7 +311,7 @@ export const services: Record<string, Service> = {
     ctaArt: "/images/icons/presentations-new.png",
     closingCta: {
       title: "Curiosity piqued?",
-      body: "Bring the deck you've got, or the idea you haven't built yet. Either way you'll leave the first call with a sharper story than you came in with.",
+      body: "Tell me who's in the room and what you need from them, and let's build the story that gets you a yes.",
       button: "Let's Connect",
     },
   },
