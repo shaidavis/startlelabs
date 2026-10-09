@@ -613,7 +613,7 @@ export function ServicePageTemplate({ service }: Props) {
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-headline leading-tight text-white mb-4">
               Principles of the {service.principlesLabel ?? service.title}.
             </h2>
-            <p className="text-white/80 leading-relaxed">
+            <p className="text-white/80 leading-relaxed text-balance">
               {service.principlesIntro}
             </p>
           </div>
@@ -633,7 +633,8 @@ export function ServicePageTemplate({ service }: Props) {
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <h3 className="text-xl sm:text-2xl font-headline text-white leading-tight">
-                    {p.title}.
+                    {/* Period only for bare titles — "Is it sticky?" keeps its own mark */}
+                    {/[.?!]$/.test(p.title) ? p.title : `${p.title}.`}
                   </h3>
                 </div>
                 <p className="text-white/75 leading-relaxed text-sm sm:text-base">

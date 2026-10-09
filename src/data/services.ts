@@ -46,7 +46,8 @@ export interface TestimonialEntry {
 
 export interface Principle {
   title: string;
-  tagline: string;
+  /** One-liner kept for reference; the page doesn't render it. */
+  tagline?: string;
   description: string;
 }
 
@@ -142,7 +143,7 @@ export const services: Record<string, Service> = {
     accentText: "#047D65",
     deliverablesBg: "#203C2B",
     heroIntro:
-      "Your brand is the face of your business. It needs to exude confidence, setting the tone for how your market perceives you. Just like wearing your best outfit, your brand should make you feel unstoppable, ready to engage with customers and stand out from competitors. When your brand looks and feels right, you walk into any room (or market) with swagger.",
+      "You have a story to tell. Is your audience interested in hearing it? You don't need to be noisy to be noticed. If we start with a meaningful story, we'll end with a memorable brand.",
     stats: [
       { label: "Companies Named", value: "192" },
       { label: "Taglines Written", value: "2,148" },
@@ -158,65 +159,59 @@ export const services: Record<string, Service> = {
       { name: "Positioning & Ads", icon: "/images/icons/magnet.png" },
       { name: "Taglines & Messaging", icon: "/images/icons/speech.png" },
       { name: "Logos & Identity", icon: "/images/icons/stamp.png" },
-      { name: "Storyboards", icon: "/images/icons/wireframes.png" },
+      { name: "Projects & Campaigns", icon: "/images/icons/wireframes.png" },
     ],
     testimonials: [
       {
         client: "LGBTech",
         image: "/images/work/lgbtech.jpg",
         author: "Shachar Grembek",
-        role: "Chair",
+        role: "Founder & Chair",
         quote:
-          "Shai's unique ability to combine creativity with a structured, methodical approach has truly stood out. His thoroughness in asking deep, context-driven questions ensured the end results were not only visually impressive but strategically aligned with our goals.",
+          "Not only is Shai uniquely creative, he's also seriously methodical. He commits himself fully to our success, and is a joy to work with.",
       },
       {
         client: "WINN.AI",
         author: "Oren Hacohen",
         role: "Head of Growth",
         quote:
-          "I've worked with Shai on brand building and creating the website of winn.ai from scratch. Shai had both great ideas and a very professional attitude. I couldn't be happier with the outcome.",
+          "Shai helped us develop our brand and website from scratch. He had great ideas and a professional attitude. I couldn't be happier with the outcome.",
       },
       { client: "Clalit" },
       { client: "PointFive" },
     ],
-    principlesIntro:
-      "Six things every brand we build has to earn before it ships.",
+    principlesLabel: "Brand",
+    principlesIntro: "Six questions to ask when building a brand",
     principles: [
       {
-        title: "Memorability",
-        tagline: "A brand that's easily recognized and remembered has staying power.",
+        title: "Is it sticky?",
         description:
-          "We ensure your brand leaves a lasting impression that sticks with your audience long after the first encounter.",
+          "Will audiences remember the brand? What's its hook? What keeps it memorable?",
       },
       {
-        title: "Relevance",
-        tagline: "A strong brand speaks directly to the needs and aspirations of its target audience.",
+        title: "Is it relevant?",
         description:
-          "We craft brands that connect deeply with your market, making sure you resonate with the right people.",
+          "What catches your audience's ear? Are the right people hearing you?",
       },
       {
-        title: "Distinctiveness",
-        tagline: "Standing out in a crowded market is key to being noticed.",
+        title: "Is it distinct?",
         description:
-          "We design brands that differentiate you from competitors and position you as unique in your space.",
+          "What does your voice add to the conversation? How does it reflect your brand's uniqueness?",
       },
       {
-        title: "Resonance",
-        tagline: "Great brands evoke feelings that create deeper customer connections.",
+        title: "Is it meaningful?",
         description:
-          "We focus on building brands that spark emotions and foster loyalty through authentic storytelling.",
+          "Does your story connect to something deeper? Is it human? What emotions does it poke?",
       },
       {
-        title: "Timelessness",
-        tagline: "Your brand should endure, growing stronger over time.",
+        title: "Is it timeless?",
         description:
-          "We create brands that can evolve with your business without feeling outdated or tied to fleeting trends.",
+          "Will the brand resonate in a year? In a decade? In a century?",
       },
       {
-        title: "Scalability",
-        tagline: "Your brand must be flexible enough to grow alongside your business.",
+        title: "Is it scalable?",
         description:
-          "We develop brands that can expand across platforms and markets while maintaining a cohesive identity.",
+          "Can your brand grow with your business? Can it shift and adapt as your story evolves?",
       },
     ],
     cta: { text: "Explore Brand Strategy", href: "/services/brand-strategy" },
@@ -224,7 +219,7 @@ export const services: Record<string, Service> = {
     ctaArt: "/images/icons/branding.png",
     closingCta: {
       title: "Confidence building?",
-      body: "Let's find the version of your brand that walks into the room like it belongs there. The first conversation is free, and usually clarifying.",
+      body: "Tell me what success looks like to you, and let's imagine how your brand and creative strategies can get you there.",
       button: "Let's Connect",
     },
   },
