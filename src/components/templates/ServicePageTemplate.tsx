@@ -789,14 +789,18 @@ const FRAME_PATH =
 /** The hand-drawn quote2 mark at text size, recoloured through a CSS mask so
     it can take the service accent (the SVG wraps a yellow bitmap). Flips match
     the big marks in the quote section. The glyph fills ~65% of its canvas, so
-    the mask is oversized and centred to trim the transparent margin. */
+    the mask is oversized and centred to trim the transparent margin. The
+    opening mark hangs in the left margin (parent must be `relative`) so the
+    quote's text stays flush with the column edge. */
 function QuoteMark({ color, closing }: { color: string; closing?: boolean }) {
   const mask = "url(/images/icons/quote2.svg) center / 1.6em 1.6em no-repeat";
   return (
     <span
       aria-hidden
-      className={`inline-block w-[1em] h-[1.1em] align-[-0.15em] ${
-        closing ? "ml-[0.15em] rotate-180 scale-x-[-1]" : "mr-[0.2em] scale-x-[-1]"
+      className={`w-[1em] h-[1.1em] ${
+        closing
+          ? "inline-block align-[-0.15em] ml-[0.15em] rotate-180 scale-x-[-1]"
+          : "absolute right-full top-[0.25em] mr-[0.2em] scale-x-[-1]"
       }`}
       style={{ backgroundColor: color, mask, WebkitMask: mask }}
     />
@@ -910,7 +914,7 @@ function ProjectsCarousel({ testimonials, accent, pageBg }: CarouselProps) {
                   </p>
                 )}
                 {active.quote && (
-                  <blockquote className="text-lg leading-relaxed opacity-85 max-w-xl">
+                  <blockquote className="relative text-lg leading-relaxed opacity-85 max-w-xl">
                     <MarkedQuote text={active.quote} color={accent} />
                   </blockquote>
                 )}
