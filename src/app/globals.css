@@ -250,3 +250,58 @@ body {
 .skip-link:focus {
   top: 0;
 }
+
+/* ── Naming cards (/naming) — 3D flip ───────────────────────────────────
+   Hover flips on pointer devices; `data-flipped` (tap / keyboard toggle)
+   flips everywhere. Reduced motion: no rotate, the back crossfades in.
+   Kept outside @theme and as plain selectors on purpose (see tailwind-v4.md). */
+.name-card {
+  perspective: 1400px;
+  -webkit-tap-highlight-color: transparent;
+}
+.name-card-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.name-card-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: 0 1px 2px rgba(35, 15, 44, 0.12), 0 12px 32px -16px rgba(35, 15, 44, 0.35);
+}
+.name-card-back {
+  transform: rotateY(180deg);
+}
+.name-card[data-flipped] .name-card-inner,
+.name-card:focus-visible .name-card-inner {
+  transform: rotateY(180deg);
+}
+@media (hover: hover) {
+  .name-card:hover .name-card-inner {
+    transform: rotateY(180deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .name-card-inner,
+  .name-card[data-flipped] .name-card-inner,
+  .name-card:focus-visible .name-card-inner,
+  .name-card:hover .name-card-inner {
+    transform: none;
+    transition: none;
+  }
+  .name-card-face {
+    transition: opacity 0.3s ease;
+  }
+  .name-card-back {
+    transform: none;
+    opacity: 0;
+  }
+  .name-card[data-flipped] .name-card-back,
+  .name-card:focus-visible .name-card-back {
+    opacity: 1;
+  }
+  @media (hover: hover) {
+    .name-card:hover .name-card-back {
+      opacity: 1;
+    }
+  }
+}
