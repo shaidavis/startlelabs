@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { grungeBackground } from "@/lib/texture";
 
 const VIEW_W = 1440;
 const DEFAULT_H = 40;
@@ -18,10 +18,10 @@ export interface TornEdgeProps {
   customPath?: string;
   viewBoxHeight?: number;
   /**
-   * When true, overlays the HeroGrunge texture on the torn shape using the
-   * same `overlay` blend mode as the adjacent section body. The grunge is
-   * clipped to the exact torn path so the texture fills right up to the
-   * jagged edge without bleeding into neighboring sections.
+   * When true, paints the torn shape with the same `grungeBackground()`
+   * recipe as the adjacent textured section body (PNG + grain), masked to
+   * the torn path. Using the shared recipe keeps the strip's tone identical
+   * to the section it extends, so no colour seam shows at the join.
    */
   grunge?: boolean;
 }
@@ -35,45 +35,38 @@ export function TornEdge({
   viewBoxHeight,
   grunge = false,
 }: TornEdgeProps) {
-  const uid = useId();
-  const clipId = `torn-clip-${uid.replace(/:/g, "")}`;
-
   const pathD = customPath ?? VARIANTS[(variant - 1) % VARIANTS.length];
   const vbH = customPath ? (viewBoxHeight ?? DEFAULT_H) : DEFAULT_H;
   const renderedH = height ?? vbH;
+
+  const position = {
+    height: `${renderedH}px`,
+    top: `-${renderedH}px`,
+    transform: pointing === "down" ? "scaleY(-1)" : undefined,
+  };
+
+  if (grunge) {
+    // Stretch the path to the box like the SVG's preserveAspectRatio="none".
+    const shape = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${VIEW_W} ${vbH}' preserveAspectRatio='none'><path d='${pathD}'/></svg>`;
+    const mask = `url("data:image/svg+xml,${encodeURIComponent(shape)}") 0 0 / 100% 100% no-repeat`;
+    return (
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-0 right-0 w-full z-[1]"
+        style={{ ...position, ...grungeBackground(color), mask, WebkitMask: mask }}
+      />
+    );
+  }
 
   return (
     <svg
       aria-hidden
       className="pointer-events-none absolute left-0 right-0 w-full z-[1]"
-      style={{
-        height: `${renderedH}px`,
-        top: `-${renderedH}px`,
-        transform: pointing === "down" ? "scaleY(-1)" : undefined,
-      }}
+      style={position}
       viewBox={`0 0 ${VIEW_W} ${vbH}`}
       preserveAspectRatio="none"
     >
-      {grunge && (
-        <defs>
-          <clipPath id={clipId}>
-            <path d={pathD} />
-          </clipPath>
-        </defs>
-      )}
       <path d={pathD} fill={color} />
-      {grunge && (
-        <image
-          href="/images/backgrounds/HeroGrunge.png"
-          x="0"
-          y="0"
-          width={VIEW_W}
-          height={vbH}
-          preserveAspectRatio="xMidYMid slice"
-          clipPath={`url(#${clipId})`}
-          style={{ mixBlendMode: "overlay" as const }}
-        />
-      )}
     </svg>
   );
 }
