@@ -786,6 +786,39 @@ export function ServicePageTemplate({ service }: Props) {
 const FRAME_PATH =
   "M449.865 8.72812L92.1819 42.2168L44.2087 81.3655L8.58154 305.409L44.2087 598.789L207.177 674.728L464.68 643.598L504.187 554.452L535.582 383.707L504.187 42.2168L449.865 8.72812Z";
 
+/** The hand-drawn quote2 mark at text size, recoloured through a CSS mask so
+    it can take the service accent (the SVG wraps a yellow bitmap). Flips match
+    the big marks in the quote section. The glyph fills ~65% of its canvas, so
+    the mask is oversized and centred to trim the transparent margin. */
+function QuoteMark({ color, closing }: { color: string; closing?: boolean }) {
+  const mask = "url(/images/icons/quote2.svg) center / 1.6em 1.6em no-repeat";
+  return (
+    <span
+      aria-hidden
+      className={`inline-block w-[1em] h-[1.1em] align-[-0.15em] ${
+        closing ? "ml-[0.15em] rotate-180 scale-x-[-1]" : "mr-[0.2em] scale-x-[-1]"
+      }`}
+      style={{ backgroundColor: color, mask, WebkitMask: mask }}
+    />
+  );
+}
+
+/** Wraps a quote in opening/closing marks. The last word is glued to the
+    closing mark so the mark can never wrap onto a line by itself. */
+function MarkedQuote({ text, color }: { text: string; color: string }) {
+  const cut = text.lastIndexOf(" ") + 1;
+  return (
+    <>
+      <QuoteMark color={color} />
+      {text.slice(0, cut)}
+      <span className="whitespace-nowrap">
+        {text.slice(cut)}
+        <QuoteMark color={color} closing />
+      </span>
+    </>
+  );
+}
+
 interface CarouselProps {
   testimonials: Service["testimonials"];
   accent: string;
@@ -878,7 +911,7 @@ function ProjectsCarousel({ testimonials, accent, pageBg }: CarouselProps) {
                 )}
                 {active.quote && (
                   <blockquote className="text-lg leading-relaxed opacity-85 max-w-xl">
-                    {active.quote}
+                    <MarkedQuote text={active.quote} color={accent} />
                   </blockquote>
                 )}
                 {active.author && (
